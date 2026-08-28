@@ -1,0 +1,36 @@
+{
+  "S2_S3": {
+    "point_strategy": "S2",
+    "uncertainty_strategy": "S3",
+    "n_days": 1081,
+    "n_both_abstain": 16,
+    "n_point_trades_uncertainty_abstains": 411,
+    "n_point_abstains_uncertainty_trades": 0,
+    "n_both_trade_same_pair": 651,
+    "n_both_trade_different_pair": 3,
+    "profits_forgone": 9279.90275,
+    "losses_avoided": 578.3662500000003,
+    "pair_selection_effect": -19.97,
+    "reverse_category_effect": 0.0,
+    "total_gap": -8721.5065,
+    "reconciliation": "EXACT",
+    "diagnostic_reverse_category_nonzero": false
+  },
+  "S4_S5": {
+    "point_strategy": "S4",
+    "uncertainty_strategy": "S5",
+    "n_days": 1081,
+    "n_both_abstain": 35,
+    "n_point_trades_uncertainty_abstains": 745,
+    "n_point_abstains_uncertainty_trades": 0,
+    "n_both_trade_same_pair": 298,
+    "n_both_trade_different_pair": 3,
+    "profits_forgone": 30054.024875,
+    "losses_avoided": 1333.3098750000004,
+    "pair_selection_effect": 448.43199999999996,
+    "reverse_category_effect": 0.0,
+    "total_gap": -28272.282999999996,
+    "reconciliation": "EXACT",
+    "diagnostic_reverse_category_nonzero": false
+  }
+}

@@ -1,0 +1,3 @@
+is_extreme_train_quantile,mae,rmse,median_ae,n
+False,26.9870155393053,39.21660370373445,16.72,8752
+True,343.965,356.03477360598737,334.95,6

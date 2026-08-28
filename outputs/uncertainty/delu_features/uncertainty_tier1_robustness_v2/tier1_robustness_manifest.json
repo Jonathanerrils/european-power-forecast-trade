@@ -1,0 +1,21 @@
+{
+  "generated_at_utc": "2026-08-24T11:05:38.318619+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "output_run_version": "uncertainty_tier1_robustness_v2",
+  "parent_uncertainty_spec": "uncertainty_selected_v1",
+  "parent_uncertainty_spec_source": "C:\\Users\\Jack\\Documents\\european-power-forecast-trade\\outputs\\uncertainty\\delu_features\\uncertainty_selected_v1\\uncertainty_run_manifest.json",
+  "window_days": 60,
+  "min_periods_days": 15,
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "tuning_performed": false,
+  "holdout_used": false,
+  "full_pooled_coverage": 0.7911943866142339,
+  "tier1_pooled_coverage": 0.8054977253450536,
+  "full_interval_score": 80.82847541896784,
+  "tier1_interval_score": 117.6004719214667,
+  "STANDING_CAVEAT": "auction_sequence == 1 is a documented, still-open assumption pending external EPEX verification (see README Limitations)."
+}

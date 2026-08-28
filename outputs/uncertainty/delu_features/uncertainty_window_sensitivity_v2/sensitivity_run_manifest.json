@@ -1,0 +1,24 @@
+{
+  "generated_at_utc": "2026-08-17T10:28:25.390719+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "output_run_version": "uncertainty_window_sensitivity_v2",
+  "pre_registered_candidate_window_days": [
+    60,
+    90,
+    120,
+    180,
+    365
+  ],
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "primary_decision_metric": "interval_score (lower is better), computed on the COMMON-ROW table",
+  "common_evaluation_start": "2023-04-01 23:00:00+00:00",
+  "common_n": 24114,
+  "lowest_interval_score_window_days": 60,
+  "flagged_folds_for_lowest_score_candidate": [],
+  "fold_calibration_flag_threshold": 0.03,
+  "STANDING_CAVEAT": "auction_sequence == 1 is a documented, still-open assumption pending external EPEX verification (see README Limitations)."
+}

@@ -1,0 +1,8 @@
+,missing_n,missing_pct
+load_forecast_mw,50,0.08147568765480381
+wind_onshore_forecast_mw,3,0.004888541259288228
+wind_offshore_forecast_mw,0,0.0
+solar_forecast_mw,3,0.004888541259288228
+renewables_forecast_mw,3,0.004888541259288228
+residual_load_forecast_mw,51,0.08310520140789988
+renewable_share_forecast,51,0.08310520140789988

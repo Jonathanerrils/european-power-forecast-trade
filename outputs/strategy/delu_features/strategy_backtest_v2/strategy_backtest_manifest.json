@@ -1,0 +1,42 @@
+{
+  "generated_at_utc": "2026-08-27T16:24:16.237909+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "uncertainty_run_version": "uncertainty_selected_v1",
+  "tier1_uncertainty_run_version": "uncertainty_tier1_robustness_v2",
+  "output_run_version": "strategy_backtest_v2",
+  "eta_rt": 0.85,
+  "c": 10.0,
+  "coverage": {
+    "raw_delivery_days": 1096,
+    "days_lag24_available": 1096,
+    "days_full_available": 1096,
+    "days_tier1_available": 1096,
+    "days_uncertainty_full_available": 1081,
+    "days_uncertainty_tier1_available": 1081,
+    "days_excluded_for_incomplete_intraday_vector": 15,
+    "common_evaluation_days": 1081
+  },
+  "structural_invariants": "PASSED",
+  "delta_forecast": 8294.778999999995,
+  "delta_uncertainty": -8721.506499999996,
+  "delta_tier1": -6724.849249999992,
+  "delta_tier1_u": -26275.625749999996,
+  "holdout_used": false,
+  "parent_run": "strategy_backtest_v1",
+  "change_type": "schema_extension_only",
+  "legacy_result_reproduction": "PASSED",
+  "new_fields": [
+    "S0_i",
+    "S0_j",
+    "S1_i",
+    "S1_j",
+    "S2_i",
+    "S2_j",
+    "S3_i",
+    "S3_j",
+    "S4_i",
+    "S4_j",
+    "S5_i",
+    "S5_j"
+  ]
+}

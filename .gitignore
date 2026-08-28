@@ -1,0 +1,27 @@
+# Secrets
+.env
+
+# Data (only data/sample/ is meant to be committed)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Outputs
+outputs/figures/*
+outputs/tables/*
+outputs/predictions/*
+!outputs/figures/.gitkeep
+!outputs/tables/.gitkeep
+!outputs/predictions/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Env
+.venv/
+venv/

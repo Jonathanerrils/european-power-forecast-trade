@@ -1,0 +1,21 @@
+{
+  "generated_at_utc": "2026-08-27T16:27:36.517150+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "uncertainty_run_version": "uncertainty_selected_v1",
+  "tier1_uncertainty_run_version": "uncertainty_tier1_robustness_v2",
+  "base_output_run_version": "strategy_backtest_v2",
+  "output_run_version": "strategy_sensitivity_v1",
+  "eta_rt_grid": [
+    0.7,
+    0.85,
+    0.92
+  ],
+  "c_grid": [
+    5,
+    10,
+    15
+  ],
+  "base_case_reproduction": "PASSED",
+  "n_common_days": 1081,
+  "holdout_used": false
+}

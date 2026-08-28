@@ -1,0 +1,10 @@
+{
+  "elasticnet_full": {
+    "alpha": 0.001,
+    "l1_ratio": 1.0
+  },
+  "elasticnet_tier1": {
+    "alpha": 0.001,
+    "l1_ratio": 1.0
+  }
+}

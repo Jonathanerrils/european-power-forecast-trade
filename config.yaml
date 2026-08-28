@@ -1,0 +1,94 @@
+# =============================================================================
+# European Day-Ahead Power Forecast-to-Trade & Tail-Risk System
+# Central configuration. Change parameters here, not inline in scripts.
+# =============================================================================
+
+project:
+  name: "european-power-forecast-trade"
+  random_seed: 42
+
+market:
+  bidding_zone: "DE-LU"
+  # ENTSO-E EIC code for DE-LU bidding zone
+  eic_code: "10Y1001A1001A82H"
+  timezone_local: "Europe/Berlin"
+  timezone_storage: "UTC"
+
+data:
+  start_date: "2019-01-01"   # clean post DE/AT bidding-zone split sample
+  end_date: null              # null = latest complete month at run time; never partial current month
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  sample_dir: "data/sample"
+  cache_dir: "data/raw/cache"
+
+# ENTSO-E document types used (see entsoe_client.py DOCUMENT_TYPES)
+entsoe:
+  base_url: "https://web-api.tp.entsoe.eu/api"
+  token_env_var: "ENTSOE_TOKEN"
+  request_timeout_seconds: 60
+  max_retries: 5
+  retry_backoff_seconds: 2
+  chunk_days: 365   # ENTSO-E API limits query windows; fetch in <=1yr chunks
+
+market_design:
+  fifteen_min_mtu_start: "2025-10-01"  # SDAC 15-minute market time units
+
+decision:
+  # Simulated analyst sits at D-1, before the day-ahead auction clears.
+  cutoff_local_time: "11:45"
+  cutoff_timezone: "Europe/Berlin"
+
+splits:
+  # Chronological only. No shuffling. See src/splits.py
+  initial_train_end: "2023-12-31"
+  validation_start: "2024-01-01"
+  validation_end: "2024-12-31"
+  rolling_validation_start: "2025-01-01"
+  rolling_validation_end: "2025-12-31"
+  holdout_start: "2026-01-01"
+  # holdout_end left null -> latest complete month, locked once holdout is run
+
+features:
+  price_lags_hours: [24, 48, 168]
+  rolling_windows_hours: [24, 168]
+
+models:
+  baselines:
+    - lag_24
+    - lag_168
+    - elasticnet
+  challenger: xgboost
+  xgboost_param_grid:
+    max_depth: [3, 4, 5]
+    n_estimators: [200, 400]
+    learning_rate: [0.03, 0.05, 0.1]
+    subsample: [0.8, 1.0]
+
+uncertainty:
+  quantiles: [0.1, 0.5, 0.9]
+  # 60 days, selected by a pre-registered sensitivity experiment across
+  # [60, 90, 120, 180, 365] candidates (run_uncertainty_sensitivity.py),
+  # scored by interval score on a common-row-corrected comparison
+  # (every candidate evaluated on the identical n=24,114 rows -- see
+  # README "Uncertainty quantification"). 180 was the original,
+  # provisional value (frozen as uncertainty_v2, kept for the historical
+  # record, not deleted). Changing this value again requires a new
+  # pre-registered sensitivity run, not an ad hoc edit -- see the
+  # "post-result tuning" discipline documented in README Process notes.
+  residual_window_days: 60
+
+strategy:
+  round_trip_efficiency_base: 0.90
+  round_trip_efficiency_sensitivity: [0.85, 0.90, 0.95]
+  transaction_cost_eur_mwh_base: 0.50
+  transaction_cost_eur_mwh_sensitivity: [0.0, 0.5, 1.0, 2.0]
+  no_trade_threshold_selection: "validation_only"
+
+risk:
+  var_confidence_levels: [0.95, 0.99]
+  rolling_window_trading_days: 500
+  extreme_regime_quantile: 0.95   # defined on TRAINING price distribution only
+
+logging:
+  level: "INFO"

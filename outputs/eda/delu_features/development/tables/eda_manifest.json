@@ -1,0 +1,11 @@
+{
+  "input_file": "C:\\Users\\Jack\\Documents\\european-power-forecast-trade\\data\\processed\\delu_features.parquet",
+  "generated_at_utc": "2026-08-16T20:52:30.896672+00:00",
+  "eda_min_timestamp": "2018-12-31T23:00:00+00:00",
+  "eda_max_timestamp": "2025-12-31T22:00:00+00:00",
+  "eda_rows": 61368,
+  "total_rows_in_input_file": 66455,
+  "holdout_start": "2026-01-01",
+  "holdout_excluded": true,
+  "holdout_rows_excluded": 5087
+}

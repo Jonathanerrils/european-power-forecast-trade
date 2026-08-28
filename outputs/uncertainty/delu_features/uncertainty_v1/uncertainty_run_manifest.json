@@ -1,0 +1,25 @@
+{
+  "generated_at_utc": "2026-08-17T00:03:53.938279+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "output_run_version": "uncertainty_v1",
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "window_days": 180,
+  "min_periods_days": 45,
+  "n_rows": 26298,
+  "residual_series_start": "2022-12-31 23:00:00+00:00",
+  "residual_series_end": "2025-12-31 22:00:00+00:00",
+  "calibration": {
+    "[forecast_q10, forecast_q90]": {
+      "n": 25218,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.7958204457133793,
+      "frac_below_lower": 0.09980965976683322,
+      "frac_above_upper": 0.10436989451978745
+    }
+  },
+  "STANDING_CAVEAT": "auction_sequence == 1 is a documented, still-open assumption pending external EPEX verification (see README Limitations). This uncertainty layer inherits that caveat unchanged."
+}

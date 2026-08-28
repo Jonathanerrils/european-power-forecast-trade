@@ -1,0 +1,2 @@
+raw_val_rows,lag_24_usable_rows,lag_168_usable_rows,elasticnet_full_usable_rows,elasticnet_tier1_usable_rows,xgboost_full_usable_rows,xgboost_tier1_usable_rows,common_comparison_rows
+8760,8693,8695,8627,8627,8627,8627,8627

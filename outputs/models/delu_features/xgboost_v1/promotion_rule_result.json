@@ -1,0 +1,7 @@
+{
+  "elasticnet_full_weighted_mae": 19.84073622800585,
+  "xgboost_full_weighted_mae": 16.74419591078877,
+  "relative_improvement": 0.1560698293466657,
+  "promotion_threshold": 0.01,
+  "decision": "PROMOTE_XGBOOST_FULL"
+}

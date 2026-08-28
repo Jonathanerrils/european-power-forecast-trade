@@ -1,0 +1,16 @@
+{
+  "generated_at_utc": "2026-08-17T21:54:10.433035+00:00",
+  "auction_sequence_run_version": "a03fix_v1",
+  "output_run_version": "smard_verification_v1",
+  "smard_filter": 4169,
+  "smard_region": "DE-LU",
+  "smard_resolution": "quarterhour",
+  "price_match_tolerance_eur_mwh": 0.01,
+  "window_start_utc": "2025-09-30 22:00:00+00:00",
+  "window_end_utc": "2025-12-31 23:00:00+00:00",
+  "match_counts": {
+    "matches_seq1": 8830,
+    "ambiguous_both_match": 3
+  },
+  "holdout_used": false
+}

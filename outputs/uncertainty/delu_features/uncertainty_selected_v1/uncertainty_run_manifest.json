@@ -1,0 +1,61 @@
+{
+  "generated_at_utc": "2026-08-17T10:47:07.007628+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "output_run_version": "uncertainty_selected_v1",
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "window_days": 60,
+  "window_days_source": "explicit CLI argument",
+  "config_yaml_default_window_days": 60,
+  "min_periods_days": 15,
+  "n_rows": 26298,
+  "residual_series_start": "2022-12-31 23:00:00+00:00",
+  "residual_series_end": "2025-12-31 22:00:00+00:00",
+  "calibration": {
+    "[forecast_q10, forecast_q90]": {
+      "n": 25938,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.7911943866142339,
+      "frac_below_lower": 0.10602205258693809,
+      "frac_above_upper": 0.10278356079882797
+    }
+  },
+  "calibration_by_fold": [
+    {
+      "fold": "fold_1",
+      "n": 8398,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.8020957370802572,
+      "frac_below_lower": 0.09418909264110502,
+      "frac_above_upper": 0.10371517027863777
+    },
+    {
+      "fold": "fold_2",
+      "n": 8782,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.7887724891824186,
+      "frac_below_lower": 0.11386927806877704,
+      "frac_above_upper": 0.09735823274880437
+    },
+    {
+      "fold": "fold_3",
+      "n": 6551,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.7792703404060449,
+      "frac_below_lower": 0.10807510303770416,
+      "frac_above_upper": 0.11265455655625095
+    },
+    {
+      "fold": "regime_stress_test",
+      "n": 2207,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.7947439963751699,
+      "frac_below_lower": 0.1137290439510648,
+      "frac_above_upper": 0.0915269596737653
+    }
+  ],
+  "STANDING_CAVEAT": "auction_sequence == 1 is a documented, still-open assumption pending external EPEX verification (see README Limitations). This uncertainty layer inherits that caveat unchanged."
+}

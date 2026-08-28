@@ -1,0 +1,14 @@
+{
+  "cache_only": true,
+  "network_fetch_allowed": false,
+  "audit_start": "2018-12-31T23:00:00+00:00",
+  "audit_end": "2026-07-31T22:00:00+00:00",
+  "expected_cache_chunks": 8,
+  "successful_cache_chunks": 8,
+  "missing_cache_chunks": 0,
+  "parse_failed_chunks": 0,
+  "complete": true,
+  "pre_cutover_pt60m_curve_types": [
+    "A03"
+  ]
+}

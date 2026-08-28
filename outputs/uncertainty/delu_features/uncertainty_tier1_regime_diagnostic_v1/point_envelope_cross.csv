@@ -1,0 +1,5 @@
+point_forecast,envelope,n,lower_tail_miss_rate
+full,full,2207,0.1137290439510648
+full,tier1,2207,0.022202084277299503
+tier1,full,2207,0.2342546443135478
+tier1,tier1,2207,0.06252831898504757
