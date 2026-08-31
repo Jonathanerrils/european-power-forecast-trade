@@ -1,0 +1,9 @@
+{
+  "generated_at_utc": "2026-08-29T16:59:08.631251+00:00",
+  "backtest_run_version": "strategy_backtest_v2",
+  "sensitivity_run_version": "strategy_sensitivity_v1",
+  "decomposition_run_version": "strategy_decomposition_v1",
+  "output_run_version": "strategy_report_v1",
+  "read_only": true,
+  "holdout_used": false
+}

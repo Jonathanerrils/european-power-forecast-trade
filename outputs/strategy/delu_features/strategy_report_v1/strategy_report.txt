@@ -1,0 +1,96 @@
+==============================================================================
+STRATEGY REPORT: strategy_report_v1
+Source: strategy_backtest_v2 / strategy_sensitivity_v1 / strategy_decomposition_v1
+==============================================================================
+
+--- 1. PROVENANCE AND EVALUATION POPULATION ---
+Common development evaluation days: 1081
+eta_rt=0.85, c=EUR10.0
+Holdout used: False (must be False)
+Structural invariants: PASSED
+
+--- 2. PRIMARY STRATEGY TABLE ---
+strategy  trading_days  no_trade_days gross_pnl   net_pnl mean_daily_pnl median_daily_pnl profitable_day_rate trade_hit_rate worst_day
+      S0             0           1081      0.00      0.00           0.00             0.00                0.0%            N/A      0.00
+      S1          1043             38 75,904.65 56,609.15          52.37            37.70               81.7%          84.7%    -77.64
+      S2          1065             16 84,606.43 64,903.93          60.04            47.21               91.1%          92.5%    -28.00
+      S3           654            427 68,281.42 56,182.42          51.97            37.54               59.9%          98.9%    -17.24
+      S4          1046             35 77,530.08 58,179.08          53.82            41.27               83.7%          86.5%    -56.82
+      S5           301            780 35,475.30 29,906.80          27.67             0.00               26.9%          96.7%    -55.05
+
+--- 3. FOUR PRE-REGISTERED COMPARISONS ---
+  XGBoost value: S2 - S1 (PRIMARY): EUR 8,294.78
+  Uncertainty value: S3 - S2: EUR -8,721.51
+  Tier-1 cost: S4 - S2: EUR -6,724.85
+  Tier-1 uncertainty cost: S5 - S3: EUR -26,275.63
+
+--- 4. 3x3 SENSITIVITY GRID (all four deltas) ---
+ eta_rt  c  delta_forecast  delta_uncertainty  delta_tier1  delta_tier1_u
+   0.70  5     7895.197250        -6786.90500 -6100.956000   -22133.73400
+   0.70 10     7658.915500        -6328.28150 -6436.752750   -20398.48075
+   0.70 15     7222.176750        -5887.94425 -6755.750500   -18640.47300
+   0.85  5     8262.254875        -7765.22450 -6357.772500   -29172.36575
+   0.85 10     8294.779000        -8721.50650 -6724.849250   -26275.62575
+   0.85 15     8706.162000        -7881.03325 -6758.718375   -25072.91250
+   0.92  5     8535.935000        -7267.02120 -6466.465200   -31567.27090
+   0.92 10     8773.465100        -8478.69000 -6999.527100   -30119.18470
+   0.92 15     8736.207500        -9036.54460 -7027.955400   -27610.78280
+  delta_forecast: +9/9  -0/9
+  delta_uncertainty: +0/9  -9/9
+  delta_tier1: +0/9  -9/9
+  delta_tier1_u: +0/9  -9/9
+
+--- 5. UNCERTAINTY DECOMPOSITION ---
+  S2 <-> S3:
+    Profits forgone: EUR 9,279.90  Losses avoided: EUR 578.37  Pair-selection: EUR -19.97
+    Reconciled gap (S3-S2): EUR -8,721.51
+  S4 <-> S5:
+    Profits forgone: EUR 30,054.02  Losses avoided: EUR 1,333.31  Pair-selection: EUR 448.43
+    Reconciled gap (S5-S4): EUR -28,272.28
+  NOTE: the S4<->S5 gap above (S5-S4) is a DIFFERENT quantity from the pre-registered
+  delta_tier1_u (S5-S3) reported in section 3 -- never substitute one for the other.
+
+--- 6. DOWNSIDE / DRAWDOWN ---
+  S0: worst_day=EUR 0.00  worst_5day=EUR 0.00  max_drawdown=EUR 0.00
+  S1: worst_day=EUR -77.64  worst_5day=EUR -104.07  max_drawdown=EUR -124.22
+  S2: worst_day=EUR -28.00  worst_5day=EUR -20.97  max_drawdown=EUR -37.51
+  S3: worst_day=EUR -17.24  worst_5day=EUR -0.35  max_drawdown=EUR -17.24
+  S4: worst_day=EUR -56.82  worst_5day=EUR -107.60  max_drawdown=EUR -129.22
+  S5: worst_day=EUR -55.05  worst_5day=EUR -55.05  max_drawdown=EUR -55.05
+
+--- 7. ORACLE / VALUE CAPTURE ---
+  Oracle total (ex-post diagnostic, not an executable strategy): EUR 72,955.08
+  S0 value capture ratio: 0.000
+  S1 value capture ratio: 0.776
+  S2 value capture ratio: 0.890
+  S3 value capture ratio: 0.770
+  S4 value capture ratio: 0.797
+  S5 value capture ratio: 0.410
+
+--- 8. CONCENTRATION ---
+  S0: top1%=EUR 0.00 (N/A)  top5%=EUR 0.00 (N/A)  top10%=EUR 0.00 (N/A)
+  S1: top1%=EUR 4,400.44 (7.8%)  top5%=EUR 12,620.83 (22.3%)  top10%=EUR 19,867.40 (35.1%)
+  S2: top1%=EUR 4,310.58 (6.6%)  top5%=EUR 12,729.61 (19.6%)  top10%=EUR 20,143.61 (31.0%)
+  S3: top1%=EUR 4,310.58 (7.7%)  top5%=EUR 12,699.07 (22.6%)  top10%=EUR 20,028.24 (35.6%)
+  S4: top1%=EUR 3,810.01 (6.5%)  top5%=EUR 12,005.83 (20.6%)  top10%=EUR 19,283.90 (33.1%)
+  S5: top1%=EUR 3,991.42 (13.3%)  top5%=EUR 11,342.48 (37.9%)  top10%=EUR 17,767.02 (59.4%)
+
+--- 9. REGIME SPLIT (pre/post 2025-10-01) ---
+  Pre-cutover (989 days): delta_forecast=EUR 7,554.77, delta_uncertainty=EUR -7,940.14, delta_tier1=EUR -6,418.58, delta_tier1_u=EUR -24,976.20
+  Post-cutover (92 days): delta_forecast=EUR 740.01, delta_uncertainty=EUR -781.36, delta_tier1=EUR -306.27, delta_tier1_u=EUR -1,299.43
+
+--- 10. STRESS-DAY SPLIT ---
+  Negative-price days: 236 stress day(s), delta_forecast=EUR 1,148.75 vs. 845 normal day(s), delta_forecast=EUR 7,146.03
+  >EUR200 days: 137 stress day(s), delta_forecast=EUR 1,125.34 vs. 944 normal day(s), delta_forecast=EUR 7,169.44
+  >EUR500 days: 6 stress day(s), delta_forecast=EUR 214.95 vs. 1075 normal day(s), delta_forecast=EUR 8,079.83
+
+--- 11. EXPLICIT LIMITATIONS ---
+  - Price-taking assumption: no market impact modeled.
+  - Market-access costs (exchange/clearing/brokerage) excluded (C_market=0).
+  - Stylised single-cycle battery: one charge, one discharge, per delivery day.
+  - Development sample only (2023-2025) -- 2026 holdout untouched, not a substitute for it.
+  - Tier-2 (wind/solar-derived) feature point-in-time availability remains unresolved --
+    a real, load-bearing limitation on the Full model's edge, not a formality.
+  - No capital/exposure model: Sharpe, annualized return, and ROI are deliberately excluded.
+
+==============================================================================
