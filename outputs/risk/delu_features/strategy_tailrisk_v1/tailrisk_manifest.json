@@ -1,0 +1,13 @@
+{
+  "generated_at_utc": "2026-08-31T20:04:05.082748+00:00",
+  "backtest_run_version": "strategy_backtest_v2",
+  "output_run_version": "strategy_tailrisk_v1",
+  "confidence_levels": [
+    0.95,
+    0.99
+  ],
+  "method": "empirical_historical",
+  "n_common_days": 1081,
+  "low_precision_tail_threshold": 20,
+  "holdout_used": false
+}
