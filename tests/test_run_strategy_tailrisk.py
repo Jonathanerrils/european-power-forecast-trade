@@ -274,6 +274,36 @@ def test_validate_pnl_catches_nonzero_s0():
         rst.validate_pnl_data(df)
 
 
+def test_validate_pnl_catches_nonnumeric_string_cleanly():
+    """Confirms the fix for a real crash: a string like 'abc' in a
+    net_pnl column previously raised an uncontrolled ValueError from
+    Python's float conversion ("could not convert string to float:
+    'abc'") rather than the clean, collected INPUT VALIDATION FAILED
+    message -- reproduced directly before this was fixed.
+    """
+    df = _valid_pnl_df()
+    df["S1_net_pnl"] = df["S1_net_pnl"].astype(object)
+    df.loc[2, "S1_net_pnl"] = "abc"
+    with pytest.raises(ValueError, match="INPUT VALIDATION FAILED"):
+        rst.validate_pnl_data(df)
+
+
+def test_validate_pnl_checks_isna_before_string_conversion():
+    """Defensive correctness, not just a live-bug reproduction: a
+    genuine NaN in delivery_date must be caught by the missing-value
+    check specifically, not accidentally routed into the holdout-
+    boundary branch by relying on a particular pandas dtype-backend's
+    astype(str) behavior. Confirmed this pandas version already
+    preserves NaN through astype(str) (so the old code path also
+    happened to work here) -- this test locks in the correct,
+    version-independent behavior going forward regardless of that.
+    """
+    df = _valid_pnl_df()
+    df.loc[2, "delivery_date"] = np.nan
+    with pytest.raises(ValueError, match="delivery_date contains missing value"):
+        rst.validate_pnl_data(df)
+
+
 # ---------------------------------------------------------------------
 # Provenance import -- confirms reuse, not duplication, of the
 # decomposition script's already-tested provenance logic

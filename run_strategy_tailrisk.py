@@ -92,9 +92,16 @@ def validate_pnl_data(per_day: pd.DataFrame, holdout_boundary: str = "2026-01-01
     """
     problems = []
 
-    dates = per_day["delivery_date"].astype(str)
-    if dates.isna().any():
+    # Check isna() BEFORE any string conversion -- do not rely on a
+    # specific pandas dtype-backend's astype(str) behavior happening to
+    # preserve NaN (confirmed correct in this environment, but that's
+    # a property of the current pandas version, not a guarantee; a
+    # version/backend where astype(str) stringifies NaN to the literal
+    # text "nan" would silently misroute this into the holdout-boundary
+    # branch instead, since "nan" >= "2026-01-01" lexicographically).
+    if per_day["delivery_date"].isna().any():
         problems.append("delivery_date contains missing value(s)")
+    dates = per_day["delivery_date"].astype(str)
     dup_days = dates[dates.duplicated()]
     if len(dup_days) > 0:
         problems.append(f"delivery_date contains {len(dup_days)} duplicate(s): {sorted(dup_days.unique())[:5]}")
@@ -110,10 +117,16 @@ def validate_pnl_data(per_day: pd.DataFrame, holdout_boundary: str = "2026-01-01
         )
 
     for strat in STRATEGIES:
-        pnl_col = per_day[f"{strat}_net_pnl"]
-        if not np.isfinite(pnl_col.astype(float)).all():
-            n_bad = int((~np.isfinite(pnl_col.astype(float))).sum())
-            problems.append(f"{strat}_net_pnl contains {n_bad} non-finite value(s) (NaN/Inf)")
+        # Coerce explicitly rather than calling .astype(float) directly:
+        # a genuinely non-numeric value (e.g. a corrupted "abc" cell)
+        # would otherwise raise an uncontrolled ValueError from Python's
+        # float conversion instead of a clean, collected validation
+        # error -- coercing to NaN routes it through the same
+        # non-finite check below instead.
+        pnl_numeric = pd.to_numeric(per_day[f"{strat}_net_pnl"], errors="coerce")
+        if not np.isfinite(pnl_numeric).all():
+            n_bad = int((~np.isfinite(pnl_numeric)).sum())
+            problems.append(f"{strat}_net_pnl contains {n_bad} non-finite or non-numeric value(s)")
 
     if "S0_net_pnl" in per_day.columns and (per_day["S0_net_pnl"] != 0).any():
         n_bad = int((per_day["S0_net_pnl"] != 0).sum())
