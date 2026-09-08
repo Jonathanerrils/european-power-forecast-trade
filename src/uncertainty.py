@@ -53,6 +53,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
+import numpy as np
 import pandas as pd
 
 logger = logging.getLogger("power_forecast.uncertainty")
@@ -191,6 +192,147 @@ def latest_residual_quantile_offsets(
     return offsets
 
 
+def residual_quantile_offsets_for_delivery_day(
+    residual_history: pd.DataFrame,
+    delivery_day,
+    quantiles: List[float],
+    window_days: int,
+    min_periods_days: int,
+    ts_col: str = "timestamp_utc",
+    local_tz: str = "Europe/Berlin",
+) -> dict:
+    """Returns ONE residual-quantile-offset snapshot for an entire
+    delivery day D, built ONLY from residuals belonging to delivery
+    days strictly before D -- correcting a real information-set
+    misalignment found in compute_rolling_residual_quantiles() when
+    applied to a whole-day decision problem.
+
+    THE BUG THIS FUNCTION FIXES, confirmed by direct execution before
+    writing this: compute_rolling_residual_quantiles()'s window is
+    computed per HOURLY timestamp (closed='left', window ending
+    strictly before that hour). For hour 15:00 of delivery day D, that
+    window can include residuals from 00:00-14:00 of the SAME day D --
+    safe for hour-by-hour one-step-ahead evaluation (its original,
+    correct use case), but not safe for this project's actual decision
+    problem: the whole delivery day D's schedule is committed at D-1
+    11:45, before ANY of day D's actual prices exist, so no hour of D
+    may ever inform the uncertainty bound used for D -- not even an
+    earlier hour of that same day.
+
+    Structural rules, each with a dedicated test:
+      - only residuals with local delivery_date < D are used;
+      - no residual from D itself is used, under any circumstance;
+      - the trailing window is measured in delivery DAYS before D, not
+        raw hourly timestamps;
+      - every hour of D receives the identical offset snapshot (one
+        decision, one information set, per docs/economic_contract_v1.md);
+      - DST is handled via local delivery_date (23/24/25-hour days),
+        never an assumed 24-row day.
+
+    min_periods_days is a count of distinct trailing DELIVERY DAYS with
+    at least one FINITE residual before D, not merely days whose date
+    exists in the index -- a day contributing only NaN/Inf residuals
+    does not count toward warm-up (fixed after a design review flagged
+    that the original version counted any date present, finite or
+    not). Returns NaN offsets (the warm-up convention already used
+    elsewhere in this module) when fewer than that many days are
+    available.
+    """
+    from .clean import add_local_time_columns
+
+    if not (0 < min_periods_days <= window_days):
+        raise ValueError(f"min_periods_days ({min_periods_days}) must be in (0, window_days={window_days}]")
+
+    df = add_local_time_columns(residual_history.copy(), ts_col=ts_col, local_tz=local_tz)
+    delivery_day = pd.Timestamp(delivery_day).date()
+
+    before_d = df[df["delivery_date"] < delivery_day]
+    window_start = delivery_day - pd.Timedelta(days=window_days)
+    windowed = before_d[before_d["delivery_date"] >= window_start]
+
+    finite_mask = np.isfinite(windowed["residual"])
+    finite_windowed = windowed[finite_mask]
+    n_days_available = finite_windowed["delivery_date"].nunique()
+    if n_days_available < min_periods_days:
+        return {f"q{int(q*100)}": float("nan") for q in quantiles}
+
+    offsets = {}
+    for q in quantiles:
+        offsets[f"q{int(q*100)}"] = float(finite_windowed["residual"].quantile(q))
+    return offsets
+
+
+def compute_delivery_day_residual_quantiles(
+    residual_series: pd.DataFrame,
+    quantiles: List[float],
+    window_days: int,
+    min_periods_days: int,
+    ts_col: str = "timestamp_utc",
+    local_tz: str = "Europe/Berlin",
+) -> pd.DataFrame:
+    """The CANONICAL delivery-day-safe path for this project's economic
+    uncertainty layer -- a drop-in-shaped replacement for
+    compute_rolling_residual_quantiles(), returning the same
+    (ts_col, prediction, forecast_qXX...) shape so every caller that
+    currently uses the old hourly function (evaluate_window_candidate,
+    find_common_evaluation_start, and every uncertainty runner) can be
+    rewired to this one without changing its output contract.
+
+    For EVERY unique local delivery day D present in residual_series,
+    computes ONE q10/q50/q90 offset snapshot using only residuals from
+    delivery days strictly before D (via the same logic as, and
+    verified consistent with,
+    residual_quantile_offsets_for_delivery_day() -- see that
+    function's hostile tests for the core correctness guarantee) and
+    applies that IDENTICAL snapshot to every hour of D.
+
+    Implemented as a centralized delivery-day loop (not a true vectorized
+    pass -- it iterates per day and applies a row-wise merge back),
+    since a development-scale residual series has on the order of a
+    thousand distinct delivery days and this is perfectly manageable
+    at that scale; the two implementations are cross-checked against
+    each other directly in this module's test suite, not just assumed
+    equivalent from sharing similar code. Not optimized further for
+    now -- correctness matters far more here than performance at this
+    scale, and premature optimization would be a diversion before the
+    holdout, not a genuine need.
+    """
+    from .clean import add_local_time_columns
+
+    if not (0 < min_periods_days <= window_days):
+        raise ValueError(f"min_periods_days ({min_periods_days}) must be in (0, window_days={window_days}]")
+
+    df = add_local_time_columns(residual_series.copy(), ts_col=ts_col, local_tz=local_tz)
+    df = df.sort_values(ts_col).reset_index(drop=True)
+
+    # One row per distinct delivery day, holding every finite residual
+    # observed on that day -- the unit this correction actually reasons
+    # about.
+    finite = df[np.isfinite(df["residual"])]
+    daily_residuals = finite.groupby("delivery_date")["residual"].apply(list).sort_index()
+    all_days = sorted(df["delivery_date"].unique())
+
+    day_offsets = {}
+    for d in all_days:
+        window_start = d - pd.Timedelta(days=window_days)
+        eligible_days = [dd for dd in daily_residuals.index if window_start <= dd < d]
+        if len(eligible_days) < min_periods_days:
+            day_offsets[d] = {f"q{int(q*100)}": float("nan") for q in quantiles}
+            continue
+        pooled = [r for dd in eligible_days for r in daily_residuals[dd]]
+        pooled_series = pd.Series(pooled)
+        day_offsets[d] = {f"q{int(q*100)}": float(pooled_series.quantile(q)) for q in quantiles}
+
+    result = df[[ts_col, "prediction", "delivery_date"]].copy()
+    for q in quantiles:
+        col = f"forecast_q{int(q*100)}"
+        offset_col = f"q{int(q*100)}"
+        result[col] = result.apply(
+            lambda row: row["prediction"] + day_offsets[row["delivery_date"]][offset_col], axis=1
+        )
+    return result.drop(columns=["delivery_date"])
+
+
 def evaluate_interval_calibration_by_fold(
     df: pd.DataFrame,
     actual_col: str,
@@ -325,7 +467,7 @@ def find_common_evaluation_start(
     lower_col = f"forecast_q{int(lo_q*100)}"
     cutoffs = []
     for window_days, min_periods_days in candidate_configs:
-        qf = compute_rolling_residual_quantiles(residual_series, quantiles, window_days, min_periods_days, ts_col)
+        qf = compute_delivery_day_residual_quantiles(residual_series, quantiles, window_days, min_periods_days, ts_col=ts_col)
         valid = qf.loc[qf[lower_col].notna(), ts_col]
         if valid.empty:
             raise ValueError(
@@ -371,8 +513,8 @@ def evaluate_window_candidate(
     window-sensitivity experiment, comparing 5 candidates) don't pay
     for and carry around per-row data they never use.
     """
-    quantile_forecasts = compute_rolling_residual_quantiles(
-        residual_series, quantiles, window_days, min_periods_days
+    quantile_forecasts = compute_delivery_day_residual_quantiles(
+        residual_series, quantiles, window_days, min_periods_days, ts_col=ts_col
     )
     merged = residual_series.merge(
         quantile_forecasts.drop(columns=["prediction"]), on="timestamp_utc", how="left"
@@ -512,6 +654,36 @@ def compute_residual_quantile_offset(
     out, not a separate computation path that could drift out of sync.
     """
     qf = compute_rolling_residual_quantiles(residual_series, [quantile], window_days, min_periods_days, ts_col)
+    q_col = f"forecast_q{int(quantile*100)}"
+    return pd.DataFrame({
+        ts_col: qf[ts_col],
+        "offset": qf[q_col] - qf["prediction"],
+    })
+
+
+def compute_delivery_day_residual_quantile_offset(
+    residual_series: pd.DataFrame,
+    quantile: float,
+    window_days: int,
+    min_periods_days: int,
+    ts_col: str = "timestamp_utc",
+    local_tz: str = "Europe/Berlin",
+) -> pd.DataFrame:
+    """Delivery-day-safe counterpart to compute_residual_quantile_offset()
+    -- same purpose (the additive offset alone, for recombining one
+    model's point forecast with a different model's uncertainty
+    envelope), built on compute_delivery_day_residual_quantiles()
+    instead of the old hourly compute_rolling_residual_quantiles().
+    compute_residual_quantile_offset() itself is deliberately left
+    unchanged and still uses the old path -- preserved for historical
+    reproducibility of results already built on it, not because it's
+    still the right choice for new economic-uncertainty work. Callers
+    doing genuine day-ahead decision analysis (e.g. the Tier-1 regime
+    diagnostic) should use this function, not the old one.
+    """
+    qf = compute_delivery_day_residual_quantiles(
+        residual_series, [quantile], window_days, min_periods_days, ts_col=ts_col, local_tz=local_tz
+    )
     q_col = f"forecast_q{int(quantile*100)}"
     return pd.DataFrame({
         ts_col: qf[ts_col],

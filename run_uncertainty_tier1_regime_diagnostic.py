@@ -1,19 +1,34 @@
-"""Run locally: python run_uncertainty_tier1_regime_diagnostic.py <xgboost_run_version> <output_run_version>
+"""Run locally: python run_uncertainty_tier1_regime_diagnostic.py <xgboost_run_version> <uncertainty_run_version> <output_run_version>
 
 Example:
-  python run_uncertainty_tier1_regime_diagnostic.py xgboost_v1_a03fix uncertainty_tier1_regime_diagnostic_v1
+  python run_uncertainty_tier1_regime_diagnostic.py xgboost_v1_a03fix uncertainty_selected_v2_dayorigin uncertainty_tier1_regime_diagnostic_v2_dayorigin
 
 DESCRIPTIVE-ONLY diagnostic, explicitly NOT a model-selection exercise
-and produces NO promotion decision. Answers exactly one question:
-Tier-1's regime_stress_test lower-tail miss rate is 45% lower than
-Full's -- is that because Tier-1's uncertainty envelope is simply 55%
-wider (mechanical), or because Tier-1's actual signed forecast errors
-are less severely skewed downward in this specific regime
-(structural)? Those require different interpretations and this script
-does not assume either answer in advance.
+and produces NO promotion decision. Answers one question: if Tier-1
+and Full differ in regime_stress_test's lower-tail miss rate under the
+corrected uncertainty specification, how much of that difference is
+associated with the residual-envelope width (mechanical) versus the
+location of the point forecast (structural)? Those require different
+interpretations and this script does not assume either answer in
+advance -- deliberately not stating a prior expectation here, since
+even a qualitative "which one dominates" claim would risk anchoring
+interpretation of the corrected result before it exists. The original
+pre-correction v1 run's specific finding is preserved as historical
+evidence in README/git history, not restated in this docstring.
 
-The frozen 60-day uncertainty_selected_v1 specification is NOT
-retuned, replaced, or reconsidered here regardless of what this
+uncertainty_run_version is a REQUIRED positional argument, not a
+default -- see run_uncertainty_tier1_robustness.py's module docstring
+for why silently defaulting to a named parent became dangerous after
+the delivery-day information-set correction.
+
+Uses compute_delivery_day_residual_quantile_offset(), not the older
+compute_residual_quantile_offset() -- the latter is built on the old
+hourly rolling method, which this diagnostic's own point x envelope
+cross would otherwise silently inherit even after the main selection
+path was fixed.
+
+The frozen uncertainty specification named by uncertainty_run_version
+is NOT retuned, replaced, or reconsidered here regardless of what this
 diagnostic finds -- see README "Uncertainty quantification" for why
 that decision is already closed.
 
@@ -30,9 +45,11 @@ Two pieces, both restricted to regime_stress_test's exact timestamps
    forecast location, the envelope width, or both -- the mechanical
    vs. structural question directly, not inferred from a proxy.
 
-STANDING CAVEAT: inherits the same auction_sequence == 1 open
-assumption as everything downstream of the price series -- see README
-Limitations. Never touches 2026.
+STANDING NOTE: auction_sequence == 1 was independently confirmed via
+cross-check against SMARD (Germany's official market data platform)
+across all 8,833 disagreeing corrected-data intervals -- 100%
+consistent with sequence 1, 0% with sequence 2. See README "Auction
+sequence" for the full result. Never touches 2026.
 """
 from __future__ import annotations
 
@@ -47,7 +64,8 @@ import numpy as np
 import pandas as pd
 
 from src.models import TARGET_COL
-from src.uncertainty import build_continuous_residual_series, compute_residual_quantile_offset
+from src.uncertainty import build_continuous_residual_series, compute_delivery_day_residual_quantile_offset
+from src.strategy import assert_no_holdout_access
 from src.utils import load_config, setup_logging, REPO_ROOT
 from run_uncertainty_tier1_robustness import load_fold_predictions, load_frozen_uncertainty_spec, FOLD_NAMES, FULL_PRED_COL, TIER1_PRED_COL
 
@@ -55,14 +73,16 @@ REGIME_FOLD_NAME = "regime_stress_test"
 
 
 def resolve_run_args(args: list) -> tuple:
-    if len(args) != 2:
+    if len(args) != 3:
         raise SystemExit(
             "Usage:\n"
-            "  python run_uncertainty_tier1_regime_diagnostic.py <xgboost_run_version> <output_run_version>\n\n"
+            "  python run_uncertainty_tier1_regime_diagnostic.py <xgboost_run_version> <uncertainty_run_version> <output_run_version>\n\n"
             "Example:\n"
-            "  python run_uncertainty_tier1_regime_diagnostic.py xgboost_v1_a03fix uncertainty_tier1_regime_diagnostic_v1"
+            "  python run_uncertainty_tier1_regime_diagnostic.py xgboost_v1_a03fix uncertainty_selected_v2_dayorigin uncertainty_tier1_regime_diagnostic_v2_dayorigin\n\n"
+            "uncertainty_run_version is REQUIRED and has no default -- pass the exact parent "
+            "uncertainty run explicitly every time."
         )
-    return args[0], args[1]
+    return args[0], args[1], args[2]
 
 
 def signed_residual_summary(residuals: pd.Series) -> dict:
@@ -86,16 +106,16 @@ def main():
     cfg = load_config()
     logger = setup_logging(cfg["logging"]["level"])
 
-    xgboost_run_version, output_run_version = resolve_run_args(sys.argv[1:])
+    xgboost_run_version, uncertainty_run_version, output_run_version = resolve_run_args(sys.argv[1:])
     input_stem = "delu_features"
 
     out_dir = REPO_ROOT / "outputs" / "uncertainty" / input_stem / output_run_version
     if out_dir.exists() and any(out_dir.iterdir()):
         raise FileExistsError(f"{out_dir} already contains results. Pass a new output_run_version.")
 
-    spec = load_frozen_uncertainty_spec(input_stem)
-    logger.info("Using FROZEN specification: window_days=%d, min_periods_days=%d (no retuning)",
-                spec["window_days"], spec["min_periods_days"])
+    spec = load_frozen_uncertainty_spec(input_stem, uncertainty_run_version, xgboost_run_version)
+    logger.info("Using FROZEN specification from '%s': window_days=%d, min_periods_days=%d (no retuning)",
+                uncertainty_run_version, spec["window_days"], spec["min_periods_days"])
 
     print("\n" + "=" * 78)
     print(f"TIER-1 REGIME DIAGNOSTIC (DESCRIPTIVE ONLY -- NO PROMOTION DECISION): {output_run_version}")
@@ -107,6 +127,7 @@ def main():
         residual_series[label] = build_continuous_residual_series(
             fold_predictions, TARGET_COL, pred_col, fold_names=FOLD_NAMES
         )
+        assert_no_holdout_access(residual_series[label]["timestamp_utc"])
 
     # Restrict to the exact regime_stress_test timestamps for both models.
     stress = {
@@ -136,7 +157,7 @@ def main():
     print(f"\n--- Point forecast delta (Tier-1 - Full), regime_stress_test ---")
     print(f"  mean={merged_stress['point_delta'].mean():.4f}, median={merged_stress['point_delta'].median():.4f}")
 
-    full_lower_col_offset = compute_residual_quantile_offset(
+    full_lower_col_offset = compute_delivery_day_residual_quantile_offset(
         residual_series["full"], 0.1, spec["window_days"], spec["min_periods_days"]
     )
     full_lower_bound = merged_stress.merge(full_lower_col_offset, on="timestamp_utc", how="left")
@@ -153,7 +174,7 @@ def main():
     print("\n--- Point forecast x envelope cross (all at q10), regime_stress_test ---")
     offsets = {}
     for label, rs in residual_series.items():
-        offsets[label] = compute_residual_quantile_offset(rs, 0.1, spec["window_days"], spec["min_periods_days"])
+        offsets[label] = compute_delivery_day_residual_quantile_offset(rs, 0.1, spec["window_days"], spec["min_periods_days"])
 
     cross_results = []
     for point_label in ("full", "tier1"):
@@ -193,6 +214,8 @@ def main():
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "xgboost_run_version": xgboost_run_version,
         "output_run_version": output_run_version,
+        "parent_uncertainty_spec": uncertainty_run_version,
+        "parent_uncertainty_spec_source": spec["source_manifest"],
         "purpose": "descriptive diagnostic only -- explains the Tier-1 robustness result, does not select or tune anything",
         "promotion_decision": None,
         "tuning_performed": False,
@@ -201,8 +224,9 @@ def main():
         "envelope_effect_on_lower_tail_miss_rate": envelope_effect,
         "point_forecast_effect_on_lower_tail_miss_rate": point_effect,
         "STANDING_CAVEAT": (
-            "auction_sequence == 1 is a documented, still-open assumption pending external "
-            "EPEX verification (see README Limitations)."
+            "auction_sequence == 1 was independently confirmed via cross-check against SMARD "
+            "(Germany official market data platform) across all 8,833 disagreeing corrected-data "
+            "intervals -- 100% consistent with sequence 1, 0% with sequence 2. See README "
         ),
     }
     with open(out_dir / "regime_diagnostic_manifest.json", "w") as f:

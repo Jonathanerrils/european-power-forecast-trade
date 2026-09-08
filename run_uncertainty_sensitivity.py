@@ -26,17 +26,23 @@ alone:
      src/uncertainty.py::compute_interval_score's docstring). Lower is
      better.
 
-The decision is NOT fully automated. This script prints the full
-comparison table and states the interval-score ranking, but explicitly
-flags if the top-ranked candidate has any single fold whose coverage
-deviates from nominal by more than FOLD_CALIBRATION_FLAG_THRESHOLD --
-a human should look at that before accepting the "winner," not trust
-one aggregate number silently, matching the same caution this project
-applied when refusing to reopen frozen baselines automatically.
+The decision is fully mechanical: the candidate with the LOWEST
+interval score on the common-row table wins, full stop -- this script
+prints the full comparison table and states the ranking, and also
+flags if the winning candidate has any single fold whose coverage
+deviates from nominal by more than FOLD_CALIBRATION_FLAG_THRESHOLD.
+That flag is diagnostic and must be reported alongside the result, but
+it does NOT alter which candidate wins or what gets recorded as the
+selected window -- deciding in advance that the flag is purely
+informational, not a discretionary override, is exactly what prevents
+"how much should this warning matter" from being answered only after
+seeing which candidate it flags.
 
-STANDING CAVEAT: inherits the same auction_sequence == 1 open
-assumption as everything downstream of the price series -- see README
-Limitations.
+STANDING NOTE: auction_sequence == 1 was independently confirmed via
+cross-check against SMARD (Germany's official market data platform)
+across all 8,833 disagreeing corrected-data intervals -- 100%
+consistent with sequence 1, 0% with sequence 2. See README "Auction
+sequence" for the full result.
 """
 from __future__ import annotations
 
@@ -55,6 +61,7 @@ from src.uncertainty import (
     evaluate_window_candidate,
     find_common_evaluation_start,
 )
+from src.strategy import assert_no_holdout_access
 from src.utils import load_config, setup_logging, REPO_ROOT
 
 FOLD_NAMES = ["fold_1", "fold_2", "fold_3", "regime_stress_test"]
@@ -129,6 +136,7 @@ def main():
         "%d rows, %s -> %s", len(residual_series),
         residual_series["timestamp_utc"].min(), residual_series["timestamp_utc"].max(),
     )
+    assert_no_holdout_access(residual_series["timestamp_utc"])
 
     print("\n" + "=" * 78)
     print(f"PRE-REGISTERED UNCERTAINTY WINDOW SENSITIVITY: {output_run_version}")
@@ -151,7 +159,12 @@ def main():
                 "median_width": r["median_width"],
                 "interval_score": r["interval_score"],
             })
-        return pd.DataFrame(rows).sort_values("interval_score")
+        # Pre-registered tie-break, fixed now rather than decided after
+        # seeing a result: an exact interval_score tie is unlikely, but
+        # if it happens, the SMALLER window wins (ascending sort on
+        # window_days as the secondary key). kind="mergesort" is stable,
+        # so this is deterministic regardless of row insertion order.
+        return pd.DataFrame(rows).sort_values(["interval_score", "window_days"], kind="mergesort")
 
     # --- Table 1: available-row, diagnostic only. Each candidate is
     # scored on however many rows IT can produce a forecast for -- a
@@ -223,13 +236,13 @@ def main():
                 flagged_folds.append((row["fold"], row["empirical_coverage"], deviation))
 
     if flagged_folds:
-        print(f"\nCAUTION: the lowest-interval-score candidate (window_days={best_window}) still has "
-              f"fold(s) with coverage more than {FOLD_CALIBRATION_FLAG_THRESHOLD*100:.0f} points off "
-              f"nominal:")
+        print(f"\nDIAGNOSTIC ONLY -- does not alter the selection: the lowest-interval-score "
+              f"candidate (window_days={best_window}) still has fold(s) with coverage more than "
+              f"{FOLD_CALIBRATION_FLAG_THRESHOLD*100:.0f} points off nominal:")
         for fold_name, coverage, deviation in flagged_folds:
             print(f"  {fold_name}: coverage={coverage:.4f} (off by {deviation*100:.2f} points)")
-        print("Do not treat the lowest interval score as a complete answer on its own -- review "
-              "these folds specifically before adopting this window as the new reference.")
+        print(f"Selection remains window_days={best_window} regardless -- this flag is reported, "
+              f"not acted on, per the pre-registered mechanical selection rule.")
     else:
         print(f"\nNo fold's coverage deviates from nominal by more than "
               f"{FOLD_CALIBRATION_FLAG_THRESHOLD*100:.0f} points for this candidate.")
@@ -250,6 +263,8 @@ def main():
         "pre_registered_candidate_window_days": CANDIDATE_WINDOW_DAYS,
         "quantiles": quantiles,
         "primary_decision_metric": "interval_score (lower is better), computed on the COMMON-ROW table",
+        "selection_rule": "mechanical: lowest common-row interval_score wins; fold-calibration flag is diagnostic-only and never alters the selection",
+        "information_set_method": "delivery_day_safe",
         "common_evaluation_start": str(common_start),
         "common_n": int(n_values[0]),
         "lowest_interval_score_window_days": best_window,
@@ -258,8 +273,9 @@ def main():
         ],
         "fold_calibration_flag_threshold": FOLD_CALIBRATION_FLAG_THRESHOLD,
         "STANDING_CAVEAT": (
-            "auction_sequence == 1 is a documented, still-open assumption pending external "
-            "EPEX verification (see README Limitations)."
+            "auction_sequence == 1 was independently confirmed via cross-check against SMARD "
+            "(Germany official market data platform) across all 8,833 disagreeing corrected-data "
+            "intervals -- 100% consistent with sequence 1, 0% with sequence 2. See README "
         ),
     }
     with open(out_dir / "sensitivity_run_manifest.json", "w") as f:

@@ -312,9 +312,9 @@ def test_main_never_prints_economics_before_a_failed_legacy_gate(tmp_path, monke
     for mod in (ru, rt1, rsb):
         monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
 
-    monkeypatch.setattr(sys, "argv", ["run_uncertainty.py", "xgboost_v1_a03fix", "uncertainty_selected_v1", "60"])
+    monkeypatch.setattr(sys, "argv", ["run_uncertainty.py", "xgboost_v1_a03fix", "uncertainty_selected_v1"])
     ru.main()
-    monkeypatch.setattr(sys, "argv", ["run_uncertainty_tier1_robustness.py", "xgboost_v1_a03fix", "unc_tier1_v1"])
+    monkeypatch.setattr(sys, "argv", ["run_uncertainty_tier1_robustness.py", "xgboost_v1_a03fix", "uncertainty_selected_v1", "unc_tier1_v1"])
     rt1.main()
 
     # Build a genuine legacy artifact, then corrupt it -- this simulates
@@ -346,3 +346,150 @@ def test_main_never_prints_economics_before_a_failed_legacy_gate(tmp_path, monke
     assert not new_out_dir.exists() or not any(new_out_dir.iterdir()), (
         "Output directory was created/populated despite a failed legacy gate"
     )
+
+
+# ---------------------------------------------------------------------
+# verify_uncertainty_lineage -- all six conditions a design review
+# specified, each tested to fail closed independently before any
+# economic calculation runs.
+# ---------------------------------------------------------------------
+def _write_full_manifest(run_dir, **overrides):
+    import json
+    run_dir.mkdir(parents=True, exist_ok=True)
+    manifest = {
+        "xgboost_run_version": "xgboost_v1_a03fix",
+        "information_set_method": "delivery_day_safe",
+        "window_days": 60,
+        "quantiles": [0.1, 0.5, 0.9],
+    }
+    manifest.update(overrides)
+    (run_dir / "uncertainty_run_manifest.json").write_text(json.dumps(manifest))
+    return manifest
+
+
+def _write_tier1_manifest(run_dir, **overrides):
+    import json
+    run_dir.mkdir(parents=True, exist_ok=True)
+    manifest = {
+        "xgboost_run_version": "xgboost_v1_a03fix",
+        "parent_uncertainty_spec": "full_v1",
+        "information_set_method": "delivery_day_safe",
+        "window_days": 60,
+        "quantiles": [0.1, 0.5, 0.9],
+    }
+    manifest.update(overrides)
+    (run_dir / "tier1_robustness_manifest.json").write_text(json.dumps(manifest))
+    return manifest
+
+
+def test_lineage_passes_on_genuinely_consistent_artifacts(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1")
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1")
+    rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")  # must not raise
+
+
+def test_lineage_rejects_full_xgboost_mismatch(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1", xgboost_run_version="other_xgb")
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1")
+    with pytest.raises(ValueError, match="UNCERTAINTY LINEAGE CHECK FAILED"):
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")
+
+
+def test_lineage_rejects_full_stale_method(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1", information_set_method="hourly_rolling")
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1")
+    with pytest.raises(ValueError, match="UNCERTAINTY LINEAGE CHECK FAILED"):
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")
+
+
+def test_lineage_rejects_tier1_xgboost_mismatch(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1")
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1", xgboost_run_version="other_xgb")
+    with pytest.raises(ValueError, match="UNCERTAINTY LINEAGE CHECK FAILED"):
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")
+
+
+def test_lineage_rejects_tier1_wrong_parent_spec(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1")
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1", parent_uncertainty_spec="a_different_full_run")
+    with pytest.raises(ValueError, match="UNCERTAINTY LINEAGE CHECK FAILED"):
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")
+
+
+def test_lineage_rejects_tier1_stale_method(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1")
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1", information_set_method="hourly_rolling")
+    with pytest.raises(ValueError, match="UNCERTAINTY LINEAGE CHECK FAILED"):
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")
+
+
+def test_lineage_rejects_window_days_mismatch(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1", window_days=60)
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1", window_days=90)
+    with pytest.raises(ValueError, match="UNCERTAINTY LINEAGE CHECK FAILED"):
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")
+
+
+def test_lineage_rejects_quantiles_mismatch(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1", quantiles=[0.1, 0.5, 0.9])
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1", quantiles=[0.05, 0.5, 0.95])
+    with pytest.raises(ValueError, match="UNCERTAINTY LINEAGE CHECK FAILED"):
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")
+
+
+def test_lineage_reports_multiple_problems_together(tmp_path, monkeypatch):
+    """Confirms the check collects ALL failures rather than stopping at
+    the first one -- more useful for diagnosing a genuinely broken
+    lineage with several issues at once.
+    """
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1", window_days=60)
+    _write_tier1_manifest(
+        tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1",
+        window_days=90, information_set_method="hourly_rolling",
+    )
+    with pytest.raises(ValueError) as exc_info:
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")
+    msg = str(exc_info.value)
+    assert "window_days" in msg
+    assert "information_set_method" in msg
+
+
+def test_lineage_raises_clearly_when_full_manifest_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1")
+    with pytest.raises(FileNotFoundError, match="Missing"):
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "never_run", "tier1_v1")
+
+
+def test_lineage_raises_clearly_when_tier1_manifest_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1")
+    with pytest.raises(FileNotFoundError, match="Missing"):
+        rsb.verify_uncertainty_lineage("delu_features", "xgboost_v1_a03fix", "full_v1", "never_run")
+
+
+def test_load_combined_data_calls_lineage_check_before_loading_predictions(tmp_path, monkeypatch):
+    """Confirms the gate is actually wired into load_combined_data(),
+    not just defined and tested in isolation -- a lineage failure must
+    prevent economic input loading even when valid XGBoost predictions
+    exist on disk.
+    """
+    monkeypatch.setattr(rsb, "REPO_ROOT", tmp_path)
+    xgb_dir = tmp_path / "outputs" / "models" / "delu_features" / "xgboost_v1_a03fix"
+    xgb_dir.mkdir(parents=True)
+    _write_synthetic_fold_predictions(xgb_dir)  # valid predictions genuinely exist
+
+    _write_full_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "full_v1", xgboost_run_version="wrong_xgb")
+    _write_tier1_manifest(tmp_path / "outputs" / "uncertainty" / "delu_features" / "tier1_v1")
+
+    with pytest.raises(ValueError, match="UNCERTAINTY LINEAGE CHECK FAILED"):
+        rsb.load_combined_data("delu_features", "xgboost_v1_a03fix", "full_v1", "tier1_v1")

@@ -69,12 +69,86 @@ def resolve_run_args(args: list) -> tuple:
     return args[0], args[1], args[2], args[3], legacy_run_version
 
 
+def verify_uncertainty_lineage(input_stem: str, xgboost_run_version: str, uncertainty_run_version: str, tier1_run_version: str) -> None:
+    """Fails closed, BEFORE any economic calculation, if the Full and
+    Tier-1 uncertainty artifacts don't actually descend from the
+    requested XGBoost run and from each other -- an earlier version of
+    load_combined_data() merged these three artifact directories
+    purely by filename, never checking that they were actually built
+    from consistent lineage. Without this, it was possible to silently
+    combine e.g. corrected Full intervals with a Tier-1 run built on a
+    different XGBoost version, or a Tier-1 run whose OWN parent
+    uncertainty specification didn't match the Full run being used
+    here.
+    """
+    full_manifest_path = REPO_ROOT / "outputs" / "uncertainty" / input_stem / uncertainty_run_version / "uncertainty_run_manifest.json"
+    if not full_manifest_path.exists():
+        raise FileNotFoundError(f"Missing {full_manifest_path}. Run run_uncertainty.py for '{uncertainty_run_version}' first.")
+    full_manifest = json.loads(full_manifest_path.read_text())
+
+    tier1_manifest_path = REPO_ROOT / "outputs" / "uncertainty" / input_stem / tier1_run_version / "tier1_robustness_manifest.json"
+    if not tier1_manifest_path.exists():
+        raise FileNotFoundError(f"Missing {tier1_manifest_path}. Run run_uncertainty_tier1_robustness.py for '{tier1_run_version}' first.")
+    tier1_manifest = json.loads(tier1_manifest_path.read_text())
+
+    problems = []
+
+    if full_manifest.get("xgboost_run_version") != xgboost_run_version:
+        problems.append(
+            f"Full uncertainty run '{uncertainty_run_version}' was built on xgboost_run_version="
+            f"{full_manifest.get('xgboost_run_version')!r}, expected {xgboost_run_version!r}"
+        )
+    if full_manifest.get("information_set_method") != "delivery_day_safe":
+        problems.append(
+            f"Full uncertainty run '{uncertainty_run_version}' has information_set_method="
+            f"{full_manifest.get('information_set_method')!r}, expected 'delivery_day_safe'"
+        )
+
+    if tier1_manifest.get("xgboost_run_version") != xgboost_run_version:
+        problems.append(
+            f"Tier-1 uncertainty run '{tier1_run_version}' was built on xgboost_run_version="
+            f"{tier1_manifest.get('xgboost_run_version')!r}, expected {xgboost_run_version!r}"
+        )
+    if tier1_manifest.get("parent_uncertainty_spec") != uncertainty_run_version:
+        problems.append(
+            f"Tier-1 uncertainty run '{tier1_run_version}' has parent_uncertainty_spec="
+            f"{tier1_manifest.get('parent_uncertainty_spec')!r}, expected {uncertainty_run_version!r} "
+            f"(the Full uncertainty run this backtest was asked to use)"
+        )
+    if tier1_manifest.get("information_set_method") != "delivery_day_safe":
+        problems.append(
+            f"Tier-1 uncertainty run '{tier1_run_version}' has information_set_method="
+            f"{tier1_manifest.get('information_set_method')!r}, expected 'delivery_day_safe'"
+        )
+    if tier1_manifest.get("window_days") != full_manifest.get("window_days"):
+        problems.append(
+            f"Tier-1 window_days={tier1_manifest.get('window_days')!r} != "
+            f"Full window_days={full_manifest.get('window_days')!r}"
+        )
+    if tier1_manifest.get("quantiles") != full_manifest.get("quantiles"):
+        problems.append(
+            f"Tier-1 quantiles={tier1_manifest.get('quantiles')!r} != "
+            f"Full quantiles={full_manifest.get('quantiles')!r}"
+        )
+
+    if problems:
+        raise ValueError(
+            "UNCERTAINTY LINEAGE CHECK FAILED -- refusing to load economic inputs from "
+            "inconsistent artifacts:\n" + "\n".join(f"  - {p}" for p in problems)
+        )
+
+
 def load_combined_data(input_stem: str, xgboost_run_version: str, uncertainty_run_version: str, tier1_run_version: str) -> pd.DataFrame:
     """Loads and merges every frozen artifact needed for all six
     strategies. Reads ONLY already-saved files -- no recomputation of
     predictions or uncertainty bounds, per the contract's provenance
-    rule.
+    rule. Verifies cross-artifact lineage BEFORE loading any of them
+    (see verify_uncertainty_lineage) -- a mismatch here must stop
+    everything downstream, not just produce a plausible-looking but
+    inconsistent backtest.
     """
+    verify_uncertainty_lineage(input_stem, xgboost_run_version, uncertainty_run_version, tier1_run_version)
+
     xgboost_dir = REPO_ROOT / "outputs" / "models" / input_stem / xgboost_run_version
     fold_names = ["fold_1", "fold_2", "fold_3", "regime_stress_test"]
     frames = []

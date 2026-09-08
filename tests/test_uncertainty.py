@@ -22,6 +22,8 @@ from src.uncertainty import (
     compute_rolling_coverage_diagnostics,
     summarize_worst_rolling_window,
     compute_residual_quantile_offset,
+    compute_delivery_day_residual_quantiles,
+    compute_delivery_day_residual_quantile_offset,
 )
 
 
@@ -427,7 +429,12 @@ def test_find_common_evaluation_start_is_the_latest_of_all_warmups():
 
     # Cross-check: the 365-day candidate (longest warm-up) alone should
     # produce this exact same cutoff, since it's the binding constraint.
-    qf_365 = compute_rolling_residual_quantiles(residual_series, [0.1, 0.5, 0.9], 365, 91)
+    # Uses compute_delivery_day_residual_quantiles -- the SAME function
+    # find_common_evaluation_start() itself now calls in production --
+    # not the old hourly function it was superseding. Asserting against
+    # the old function would only prove consistency with the
+    # implementation this whole correction exists to replace.
+    qf_365 = compute_delivery_day_residual_quantiles(residual_series, [0.1, 0.5, 0.9], 365, 91)
     expected = qf_365.loc[qf_365["forecast_q10"].notna(), "timestamp_utc"].min()
     assert common_start == expected
 
@@ -620,3 +627,429 @@ def test_offset_can_be_added_to_a_different_series_point_forecast():
     hybrid = series_b_prediction + offset_a["offset"]
     # Once warmed up, A's residual is always 1.0, so A's rolling median offset is exactly 1.0.
     assert hybrid.iloc[-1] == pytest.approx(200.0 + 1.0)
+
+
+# ---------------------------------------------------------------------
+# residual_quantile_offsets_for_delivery_day -- corrects a real
+# information-set misalignment found in compute_rolling_residual_quantiles()
+# when applied to this project's whole-delivery-day decision problem.
+# Confirmed by direct execution before this function was written:
+# hour 15:00 of delivery day D could include residuals from 00:00-14:00
+# of that SAME day D in its rolling window -- safe for hour-by-hour
+# one-step-ahead evaluation, not safe for a decision committed at D-1
+# 11:45 before any of day D's prices exist.
+# ---------------------------------------------------------------------
+def _build_delivery_day_residual_history(n_days=10, hours_per_day=24, residual_fn=None, prediction_fn=None):
+    """Builds a residual history with genuine multi-hour delivery days,
+    using real UTC timestamps aligned to local Europe/Berlin days.
+    residual_fn(day_index, hour_index) -> residual value; defaults to 0.
+    prediction_fn(day_index, hour_index) -> point forecast value;
+    defaults to 0 -- pass a real function when a test needs to
+    distinguish "the offset is identical across D" from the weaker,
+    accidental "the absolute bound is identical across D", which only
+    coincides when every prediction happens to be 0.
+    """
+    from src.clean import local_delivery_date_to_utc
+    residual_fn = residual_fn or (lambda d, h: 0.0)
+    prediction_fn = prediction_fn or (lambda d, h: 0.0)
+    rows = []
+    for d in range(n_days):
+        day_start = local_delivery_date_to_utc(f"2023-01-{d+1:02d}")
+        for h in range(hours_per_day):
+            ts = day_start + pd.Timedelta(hours=h)
+            rows.append({
+                "timestamp_utc": ts, "prediction": prediction_fn(d, h),
+                "residual": residual_fn(d, h),
+            })
+    return pd.DataFrame(rows)
+
+
+def test_delivery_day_offsets_hostile_test_changing_day_D_residual_never_changes_its_own_bound():
+    """THE critical correctness test a design review specifically
+    required: modifying ANY residual belonging to delivery day D must
+    not change the offset snapshot computed FOR day D, since none of
+    day D's own residuals are available at the D-1 11:45 decision
+    origin -- not even an earlier hour of that same day.
+    """
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+    history = _build_delivery_day_residual_history(n_days=20, residual_fn=lambda d, h: float(d))
+    target_day = pd.Timestamp("2023-01-20").date()  # day index 19 (0-indexed)
+
+    original = residual_quantile_offsets_for_delivery_day(
+        history, target_day, [0.1, 0.5, 0.9], window_days=10, min_periods_days=3
+    )
+
+    # Corrupt EVERY residual belonging to target_day (day index 19) --
+    # including earlier hours of that same day.
+    corrupted = history.copy()
+    from src.clean import add_local_time_columns
+    tagged = add_local_time_columns(corrupted.copy())
+    mask = tagged["delivery_date"] == target_day
+    corrupted.loc[mask, "residual"] = 999999.0
+
+    result_after_corruption = residual_quantile_offsets_for_delivery_day(
+        corrupted, target_day, [0.1, 0.5, 0.9], window_days=10, min_periods_days=3
+    )
+
+    assert result_after_corruption == original, (
+        "Corrupting delivery day D's own residuals changed D's own uncertainty bound -- "
+        "this is exactly the leakage this function exists to prevent."
+    )
+
+
+def test_delivery_day_offsets_hostile_test_earlier_hour_of_same_day_specifically():
+    """A narrower, more targeted version of the hostile test: corrupt
+    ONLY hour 0 of day D (an EARLIER hour of the SAME day being
+    predicted) -- exactly the specific leakage path a design review
+    identified (hour 15 of D could see hours 0-14 of the SAME D).
+    """
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+    from src.clean import local_delivery_date_to_utc
+
+    history = _build_delivery_day_residual_history(n_days=15, residual_fn=lambda d, h: 1.0)
+    target_day = pd.Timestamp("2023-01-15").date()
+
+    original = residual_quantile_offsets_for_delivery_day(
+        history, target_day, [0.5], window_days=10, min_periods_days=3
+    )
+
+    corrupted = history.copy()
+    day_start = local_delivery_date_to_utc("2023-01-15")
+    hour_0_mask = corrupted["timestamp_utc"] == day_start
+    assert hour_0_mask.sum() == 1  # sanity: exactly one matching row
+    corrupted.loc[hour_0_mask, "residual"] = -999999.0
+
+    result = residual_quantile_offsets_for_delivery_day(
+        corrupted, target_day, [0.5], window_days=10, min_periods_days=3
+    )
+    assert result == original
+
+
+def test_delivery_day_offsets_uses_prior_days_correctly():
+    """Positive control for the hostile test above: corrupting a day
+    BEFORE D (which legitimately should be visible) DOES change D's
+    offset -- confirms the function isn't just trivially ignoring all
+    input. Uses q90, not q50: the median is inherently robust to a
+    single day's worth of extreme values pooled among many unchanged
+    days, so median was the wrong statistic to detect this with (found
+    by actually running this test, not assumed).
+    """
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+    history = _build_delivery_day_residual_history(n_days=15, residual_fn=lambda d, h: 1.0)
+    target_day = pd.Timestamp("2023-01-15").date()
+
+    original = residual_quantile_offsets_for_delivery_day(
+        history, target_day, [0.9], window_days=10, min_periods_days=3
+    )
+
+    corrupted = history.copy()
+    from src.clean import add_local_time_columns
+    tagged = add_local_time_columns(corrupted.copy())
+    prior_day = pd.Timestamp("2023-01-14").date()
+    mask = tagged["delivery_date"] == prior_day
+    corrupted.loc[mask, "residual"] = 999999.0
+
+    result = residual_quantile_offsets_for_delivery_day(
+        corrupted, target_day, [0.9], window_days=10, min_periods_days=3
+    )
+    assert result != original, "Corrupting a legitimately-visible PRIOR day had no effect -- function may be ignoring input entirely"
+
+
+def test_delivery_day_offsets_same_snapshot_for_every_hour_of_D():
+    """One decision, one information set: every hour of delivery day D
+    must receive the IDENTICAL offset snapshot -- confirmed by calling
+    with delivery_day=D regardless of which specific hour's forecast
+    is being adjusted (the function takes a DAY, not an hour, by
+    design -- this test documents that the API itself enforces this).
+    """
+    import inspect
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+    params = inspect.signature(residual_quantile_offsets_for_delivery_day).parameters
+    assert "delivery_day" in params
+    assert "hour" not in params and "timestamp" not in params  # no way to ask for an hour-specific snapshot
+
+
+def _timestamps_for_local_day(day_str: str) -> pd.DatetimeIndex:
+    """Every real hourly timestamp genuinely belonging to one local
+    Europe/Berlin delivery day -- 23, 24, or 25 depending on DST,
+    determined from the actual UTC boundary, never assumed.
+    """
+    from src.clean import local_delivery_date_to_utc
+    day = pd.Timestamp(day_str)
+    next_day = day + pd.Timedelta(days=1)
+    start = local_delivery_date_to_utc(day.strftime("%Y-%m-%d"))
+    end = local_delivery_date_to_utc(next_day.strftime("%Y-%m-%d"))
+    return pd.date_range(start=start, end=end, freq="1h", inclusive="left")
+
+
+def test_local_day_timestamp_helper_gives_correct_dst_hour_counts():
+    """Sanity-checks the test helper itself before relying on it --
+    23 hours on the spring-forward day, 25 on the fall-back day.
+    """
+    assert len(_timestamps_for_local_day("2024-03-31")) == 23
+    assert len(_timestamps_for_local_day("2024-10-27")) == 25
+
+
+def test_delivery_day_offsets_dst_spring_forward_23_hour_day():
+    """DST handled via local delivery_date, never an assumed 24-row
+    day -- a 23-hour spring-forward day must not break the day-count
+    logic or silently misalign the window.
+
+    An earlier version of this test had a real bug: it built the day
+    range with `for d in range(10): ... if d != 10 else "2024-03-31"`
+    -- since range(10) only ever produces 0..9, that condition was
+    always true and 2024-03-31 was NEVER actually constructed. The
+    test still passed, because it was only proving a snapshot COULD be
+    computed from ten *other*, ordinary 24-hour days -- it never
+    exercised the 23-hour day it claimed to test. Found by reading the
+    test's own loop logic carefully, not assumed correct because it
+    was green. Fixed here to genuinely construct the DST day using
+    real local-day boundaries.
+    """
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+
+    rows = []
+    for day_str in ["2024-03-20", "2024-03-21", "2024-03-22", "2024-03-23", "2024-03-24",
+                     "2024-03-25", "2024-03-26", "2024-03-27", "2024-03-28", "2024-03-29"]:
+        for ts in _timestamps_for_local_day(day_str):
+            rows.append({"timestamp_utc": ts, "prediction": 0.0, "residual": 1.0})
+    for ts in _timestamps_for_local_day("2024-03-31"):  # the actual 23-hour DST day, genuinely present now
+        rows.append({"timestamp_utc": ts, "prediction": 0.0, "residual": 1.0})
+    history = pd.DataFrame(rows)
+
+    target_day = pd.Timestamp("2024-03-31").date()
+    result = residual_quantile_offsets_for_delivery_day(history, target_day, [0.5], window_days=8, min_periods_days=3)
+    assert not pd.isna(result["q50"])
+
+
+def test_delivery_day_offsets_dst_fall_back_25_hour_day():
+    """The genuinely missing case: no test previously constructed an
+    actual 25-hour autumn fall-back delivery day at all.
+    """
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+
+    rows = []
+    for day_str in ["2024-10-17", "2024-10-18", "2024-10-19", "2024-10-20", "2024-10-21",
+                     "2024-10-22", "2024-10-23", "2024-10-24", "2024-10-25", "2024-10-26"]:
+        for ts in _timestamps_for_local_day(day_str):
+            rows.append({"timestamp_utc": ts, "prediction": 0.0, "residual": 1.0})
+    fall_back_rows = list(_timestamps_for_local_day("2024-10-27"))
+    assert len(fall_back_rows) == 25  # confirms this really is the 25-hour day, not assumed
+    for ts in fall_back_rows:
+        rows.append({"timestamp_utc": ts, "prediction": 0.0, "residual": 1.0})
+    history = pd.DataFrame(rows)
+
+    target_day = pd.Timestamp("2024-10-27").date()
+    result = residual_quantile_offsets_for_delivery_day(history, target_day, [0.5], window_days=8, min_periods_days=3)
+    assert not pd.isna(result["q50"])
+
+
+def test_delivery_day_offsets_warmup_returns_nan():
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+    history = _build_delivery_day_residual_history(n_days=2, residual_fn=lambda d, h: 1.0)
+    target_day = pd.Timestamp("2023-01-03").date()  # only 2 prior days available
+    result = residual_quantile_offsets_for_delivery_day(
+        history, target_day, [0.1, 0.5, 0.9], window_days=10, min_periods_days=5
+    )
+    assert all(pd.isna(v) for v in result.values())
+
+
+def test_delivery_day_offsets_rejects_invalid_min_periods():
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+    history = _build_delivery_day_residual_history(n_days=5)
+    with pytest.raises(ValueError, match="min_periods_days"):
+        residual_quantile_offsets_for_delivery_day(
+            history, pd.Timestamp("2023-01-05").date(), [0.5], window_days=5, min_periods_days=10
+        )
+
+
+def test_delivery_day_offsets_hand_verifiable():
+    """Fully hand-verifiable: 5 prior days, each with residual = day
+    index (0,1,2,3,4). Median of [0,1,2,3,4] = 2.0.
+    """
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+    history = _build_delivery_day_residual_history(n_days=5, residual_fn=lambda d, h: float(d))
+    target_day = pd.Timestamp("2023-01-06").date()  # day AFTER all 5 built days
+    result = residual_quantile_offsets_for_delivery_day(
+        history, target_day, [0.5], window_days=10, min_periods_days=3
+    )
+    assert result["q50"] == pytest.approx(2.0)
+
+
+# ---------------------------------------------------------------------
+# NaN/non-finite hardening for residual_quantile_offsets_for_delivery_day --
+# a design review flagged that the original version counted a delivery
+# day toward min_periods_days merely because its date existed in the
+# index, even if every residual on that day was NaN/Inf.
+# ---------------------------------------------------------------------
+def test_delivery_day_offsets_nan_only_day_does_not_count_toward_warmup():
+    """A day whose every residual is NaN must not satisfy
+    min_periods_days merely because its date is present.
+    """
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+    history = _build_delivery_day_residual_history(n_days=5, residual_fn=lambda d, h: 1.0)
+    # Corrupt one entire day's residuals to NaN.
+    from src.clean import add_local_time_columns
+    tagged = add_local_time_columns(history.copy())
+    bad_day = pd.Timestamp("2023-01-03").date()
+    history.loc[tagged["delivery_date"] == bad_day, "residual"] = float("nan")
+
+    target_day = pd.Timestamp("2023-01-06").date()
+    # Only 4 genuinely-finite days remain (out of 5); min_periods_days=5 should now fail.
+    result = residual_quantile_offsets_for_delivery_day(
+        history, target_day, [0.5], window_days=10, min_periods_days=5
+    )
+    assert all(pd.isna(v) for v in result.values())
+
+
+def test_delivery_day_offsets_nan_day_excluded_from_quantile_pool():
+    """Even when enough OTHER days satisfy warm-up, a NaN-only day's
+    (non-)values must not corrupt the pooled quantile computation.
+    """
+    from src.uncertainty import residual_quantile_offsets_for_delivery_day
+    from src.clean import add_local_time_columns
+    history = _build_delivery_day_residual_history(n_days=5, residual_fn=lambda d, h: 1.0)
+    tagged = add_local_time_columns(history.copy())
+    bad_day = pd.Timestamp("2023-01-03").date()
+    history.loc[tagged["delivery_date"] == bad_day, "residual"] = float("nan")
+
+    target_day = pd.Timestamp("2023-01-06").date()
+    result = residual_quantile_offsets_for_delivery_day(
+        history, target_day, [0.5], window_days=10, min_periods_days=3
+    )
+    # The 4 finite days all have residual=1.0 -- median must be exactly 1.0,
+    # not NaN or distorted by the excluded day.
+    assert result["q50"] == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------
+# compute_delivery_day_residual_quantiles -- the canonical, vectorized
+# central function meant to replace compute_rolling_residual_quantiles()
+# everywhere the economic uncertainty layer is actually used.
+# ---------------------------------------------------------------------
+def test_compute_delivery_day_residual_quantiles_returns_expected_shape():
+    from src.uncertainty import compute_delivery_day_residual_quantiles
+    history = _build_delivery_day_residual_history(n_days=10, residual_fn=lambda d, h: float(d))
+    result = compute_delivery_day_residual_quantiles(history, [0.1, 0.5, 0.9], window_days=5, min_periods_days=2)
+    assert list(result.columns) == ["timestamp_utc", "prediction", "forecast_q10", "forecast_q50", "forecast_q90"]
+    assert len(result) == len(history)  # one row per original hourly row, same as compute_rolling_residual_quantiles
+
+
+def test_compute_delivery_day_residual_quantiles_matches_single_day_function():
+    """Cross-check: the centralized delivery-day function and the
+    single-day primitive must agree exactly for the same target day --
+    two different implementations of the same logic, verified
+    consistent directly rather than assumed from sharing similar code.
+
+    Uses VARYING predictions across hours of D (not the earlier
+    version's constant prediction=0), and asserts the invariant on the
+    OFFSET (forecast_q - prediction), not the raw absolute bound. An
+    earlier version of this test only checked forecast_q.nunique()==1
+    directly, which passed only because prediction happened to be 0
+    for every hour -- it was proving the accidental invariant "every
+    absolute bound is numerically identical" rather than the real one,
+    "every hour of D shares the same additive offset." With real,
+    differing point forecasts per hour, only the offset is actually
+    constant across D; the absolute bounds correctly differ.
+    """
+    from src.uncertainty import compute_delivery_day_residual_quantiles, residual_quantile_offsets_for_delivery_day
+    history = _build_delivery_day_residual_history(
+        n_days=15, residual_fn=lambda d, h: float(d % 4), prediction_fn=lambda d, h: 50.0 + h * 2.0,
+    )
+
+    full_result = compute_delivery_day_residual_quantiles(history, [0.1, 0.5, 0.9], window_days=8, min_periods_days=3)
+    target_day = pd.Timestamp("2023-01-15").date()
+    single_result = residual_quantile_offsets_for_delivery_day(
+        history, target_day, [0.1, 0.5, 0.9], window_days=8, min_periods_days=3
+    )
+
+    from src.clean import add_local_time_columns
+    combined = pd.concat([full_result, history[["timestamp_utc"]]], axis=1)
+    combined = combined.loc[:, ~combined.columns.duplicated()]
+    tagged_full = add_local_time_columns(combined)
+    day_rows = tagged_full[tagged_full["delivery_date"] == target_day]
+    assert len(day_rows) > 0
+
+    for q in [10, 50, 90]:
+        # Predictions genuinely vary across D's hours (confirmed, not assumed):
+        assert day_rows["prediction"].nunique() > 1
+        # ...but the absolute bound therefore must also vary across D's hours,
+        # since bound = prediction + a CONSTANT offset:
+        assert day_rows[f"forecast_q{q}"].nunique() > 1
+        # The actual invariant: the OFFSET is identical across every hour of D.
+        offsets = day_rows[f"forecast_q{q}"] - day_rows["prediction"]
+        assert offsets.nunique() == 1
+        assert offsets.iloc[0] == pytest.approx(single_result[f"q{q}"])
+
+
+def test_compute_delivery_day_residual_quantiles_hostile_test():
+    """Same hostile test as the single-day primitive, applied to the
+    vectorized central function: corrupting delivery day D's own
+    residuals must not change D's row in the output.
+    """
+    from src.uncertainty import compute_delivery_day_residual_quantiles
+    from src.clean import add_local_time_columns
+    history = _build_delivery_day_residual_history(n_days=20, residual_fn=lambda d, h: float(d))
+    target_day = pd.Timestamp("2023-01-20").date()
+
+    original = compute_delivery_day_residual_quantiles(history, [0.5], window_days=10, min_periods_days=3)
+
+    corrupted = history.copy()
+    tagged = add_local_time_columns(corrupted.copy())
+    mask = tagged["delivery_date"] == target_day
+    corrupted.loc[mask, "residual"] = 999999.0
+    corrupted_result = compute_delivery_day_residual_quantiles(corrupted, [0.5], window_days=10, min_periods_days=3)
+
+    tagged_original = add_local_time_columns(pd.concat([original, history[["timestamp_utc"]]], axis=1).loc[:, ~pd.concat([original, history[["timestamp_utc"]]], axis=1).columns.duplicated()])
+    tagged_corrupted = add_local_time_columns(pd.concat([corrupted_result, history[["timestamp_utc"]]], axis=1).loc[:, ~pd.concat([corrupted_result, history[["timestamp_utc"]]], axis=1).columns.duplicated()])
+
+    orig_day_rows = tagged_original[tagged_original["delivery_date"] == target_day]["forecast_q50"].tolist()
+    corrupted_day_rows = tagged_corrupted[tagged_corrupted["delivery_date"] == target_day]["forecast_q50"].tolist()
+    assert orig_day_rows == corrupted_day_rows
+
+
+def test_compute_delivery_day_residual_quantiles_warmup_nan():
+    from src.uncertainty import compute_delivery_day_residual_quantiles
+    from src.clean import add_local_time_columns
+    history = _build_delivery_day_residual_history(n_days=3, residual_fn=lambda d, h: 1.0)
+    result = compute_delivery_day_residual_quantiles(history, [0.5], window_days=10, min_periods_days=5)
+    tagged = add_local_time_columns(pd.concat([result, history[["timestamp_utc"]]], axis=1).loc[:, ~pd.concat([result, history[["timestamp_utc"]]], axis=1).columns.duplicated()])
+    first_day = sorted(tagged["delivery_date"].unique())[0]
+    first_day_rows = tagged[tagged["delivery_date"] == first_day]
+    assert first_day_rows["forecast_q50"].isna().all()  # no prior days at all -> NaN
+
+
+# ---------------------------------------------------------------------
+# Architecture guards: prove the economic uncertainty path genuinely
+# does NOT call the old hourly method, not just that the new helper
+# works in isolation. A design review specifically noted this
+# distinction -- prior tests thoroughly proved the new function is
+# correct, but never proved the production code path actually uses it.
+# ---------------------------------------------------------------------
+def test_evaluate_window_candidate_never_uses_hourly_quantile_path(monkeypatch):
+    import src.uncertainty as u
+    residual_series = _synthetic_residual_series()
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("old hourly uncertainty path (compute_rolling_residual_quantiles) was called")
+
+    monkeypatch.setattr(u, "compute_rolling_residual_quantiles", forbidden)
+
+    result = u.evaluate_window_candidate(
+        residual_series, [0.1, 0.5, 0.9], window_days=60, min_periods_days=15, target_col="price_eur_mwh",
+    )
+    assert result["pooled_calibration"]["n"] > 0
+
+
+def test_find_common_evaluation_start_never_uses_hourly_quantile_path(monkeypatch):
+    import src.uncertainty as u
+    residual_series = _synthetic_residual_series()
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("old hourly uncertainty path (compute_rolling_residual_quantiles) was called")
+
+    monkeypatch.setattr(u, "compute_rolling_residual_quantiles", forbidden)
+
+    configs = [(60, 15), (180, 45)]
+    common_start = u.find_common_evaluation_start(residual_series, [0.1, 0.5, 0.9], configs)
+    assert common_start is not None
