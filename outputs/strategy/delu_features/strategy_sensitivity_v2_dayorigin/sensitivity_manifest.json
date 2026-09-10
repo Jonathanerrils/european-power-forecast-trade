@@ -1,0 +1,21 @@
+{
+  "generated_at_utc": "2026-09-09T19:16:27.682919+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "uncertainty_run_version": "uncertainty_selected_v2_dayorigin",
+  "tier1_uncertainty_run_version": "uncertainty_tier1_robustness_v3_dayorigin",
+  "base_output_run_version": "strategy_backtest_v3_dayorigin",
+  "output_run_version": "strategy_sensitivity_v2_dayorigin",
+  "eta_rt_grid": [
+    0.7,
+    0.85,
+    0.92
+  ],
+  "c_grid": [
+    5,
+    10,
+    15
+  ],
+  "base_case_reproduction": "PASSED",
+  "n_common_days": 1081,
+  "holdout_used": false
+}

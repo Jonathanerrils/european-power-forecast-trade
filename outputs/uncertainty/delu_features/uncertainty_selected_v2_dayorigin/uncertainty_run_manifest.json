@@ -1,0 +1,64 @@
+{
+  "generated_at_utc": "2026-09-08T20:16:07.870859+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "output_run_version": "uncertainty_selected_v2_dayorigin",
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "window_days": 60,
+  "window_days_source": "mechanically selected by sensitivity run 'uncertainty_window_sensitivity_v3_dayorigin'",
+  "parent_sensitivity_run": "uncertainty_window_sensitivity_v3_dayorigin",
+  "selected_window_days": 60,
+  "selection_rule": "mechanical: lowest common-row interval score, read from parent sensitivity manifest",
+  "min_periods_days": 15,
+  "information_set_method": "delivery_day_safe",
+  "n_rows": 26298,
+  "residual_series_start": "2022-12-31 23:00:00+00:00",
+  "residual_series_end": "2025-12-31 22:00:00+00:00",
+  "calibration": {
+    "[forecast_q10, forecast_q90]": {
+      "n": 25938,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.7892281594571671,
+      "frac_below_lower": 0.10683167553396561,
+      "frac_above_upper": 0.1039401650088673
+    }
+  },
+  "calibration_by_fold": [
+    {
+      "fold": "fold_1",
+      "n": 8398,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.8011431293165039,
+      "frac_below_lower": 0.09430816861157418,
+      "frac_above_upper": 0.10454870207192189
+    },
+    {
+      "fold": "fold_2",
+      "n": 8782,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.7861534957868367,
+      "frac_below_lower": 0.11546344796173992,
+      "frac_above_upper": 0.09838305625142336
+    },
+    {
+      "fold": "fold_3",
+      "n": 6551,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.7775912074492444,
+      "frac_below_lower": 0.10853304838955885,
+      "frac_above_upper": 0.11387574416119677
+    },
+    {
+      "fold": "regime_stress_test",
+      "n": 2207,
+      "nominal_coverage": 0.8,
+      "empirical_coverage": 0.790666062528319,
+      "frac_below_lower": 0.11508835523334844,
+      "frac_above_upper": 0.09424558223833258
+    }
+  ],
+  "STANDING_CAVEAT": "auction_sequence == 1 was independently confirmed via cross-check against SMARD (Germany official market data platform) across all 8,833 disagreeing corrected-data intervals -- 100% consistent with sequence 1, 0% with sequence 2. See README  This uncertainty layer inherits that caveat unchanged."
+}

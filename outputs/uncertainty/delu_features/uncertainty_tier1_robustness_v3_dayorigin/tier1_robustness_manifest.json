@@ -1,0 +1,22 @@
+{
+  "generated_at_utc": "2026-09-08T20:28:01.769639+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "output_run_version": "uncertainty_tier1_robustness_v3_dayorigin",
+  "parent_uncertainty_spec": "uncertainty_selected_v2_dayorigin",
+  "parent_uncertainty_spec_source": "C:\\Users\\Jack\\Documents\\european-power-forecast-trade\\outputs\\uncertainty\\delu_features\\uncertainty_selected_v2_dayorigin\\uncertainty_run_manifest.json",
+  "window_days": 60,
+  "min_periods_days": 15,
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "tuning_performed": false,
+  "information_set_method": "delivery_day_safe",
+  "holdout_used": false,
+  "full_pooled_coverage": 0.7892281594571671,
+  "tier1_pooled_coverage": 0.8028760891356311,
+  "full_interval_score": 81.43995116105182,
+  "tier1_interval_score": 118.65622283129109,
+  "STANDING_CAVEAT": "auction_sequence == 1 was independently confirmed via cross-check against SMARD (Germany official market data platform) across all 8,833 disagreeing corrected-data intervals -- 100% consistent with sequence 1, 0% with sequence 2. See README "
+}

@@ -1,0 +1,26 @@
+{
+  "generated_at_utc": "2026-09-08T20:05:01.012337+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "output_run_version": "uncertainty_window_sensitivity_v3_dayorigin",
+  "pre_registered_candidate_window_days": [
+    60,
+    90,
+    120,
+    180,
+    365
+  ],
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "primary_decision_metric": "interval_score (lower is better), computed on the COMMON-ROW table",
+  "selection_rule": "mechanical: lowest common-row interval_score wins; fold-calibration flag is diagnostic-only and never alters the selection",
+  "information_set_method": "delivery_day_safe",
+  "common_evaluation_start": "2023-04-01 22:00:00+00:00",
+  "common_n": 24115,
+  "lowest_interval_score_window_days": 60,
+  "flagged_folds_for_lowest_score_candidate": [],
+  "fold_calibration_flag_threshold": 0.03,
+  "STANDING_CAVEAT": "auction_sequence == 1 was independently confirmed via cross-check against SMARD (Germany official market data platform) across all 8,833 disagreeing corrected-data intervals -- 100% consistent with sequence 1, 0% with sequence 2. See README "
+}

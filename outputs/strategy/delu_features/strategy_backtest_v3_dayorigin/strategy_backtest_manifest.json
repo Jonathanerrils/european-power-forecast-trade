@@ -1,0 +1,25 @@
+{
+  "generated_at_utc": "2026-09-09T19:11:43.001074+00:00",
+  "xgboost_run_version": "xgboost_v1_a03fix",
+  "uncertainty_run_version": "uncertainty_selected_v2_dayorigin",
+  "tier1_uncertainty_run_version": "uncertainty_tier1_robustness_v3_dayorigin",
+  "output_run_version": "strategy_backtest_v3_dayorigin",
+  "eta_rt": 0.85,
+  "c": 10.0,
+  "coverage": {
+    "raw_delivery_days": 1096,
+    "days_lag24_available": 1096,
+    "days_full_available": 1096,
+    "days_tier1_available": 1096,
+    "days_uncertainty_full_available": 1081,
+    "days_uncertainty_tier1_available": 1081,
+    "days_excluded_for_incomplete_intraday_vector": 15,
+    "common_evaluation_days": 1081
+  },
+  "structural_invariants": "PASSED",
+  "delta_forecast": 8294.778999999995,
+  "delta_uncertainty": -8760.734999999993,
+  "delta_tier1": -6724.849249999992,
+  "delta_tier1_u": -26988.01775,
+  "holdout_used": false
+}
