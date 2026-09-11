@@ -1,0 +1,20 @@
+[
+  "load_forecast_mw",
+  "price_lag_24h",
+  "price_lag_48h",
+  "price_lag_168h",
+  "price_rolling_mean_24h",
+  "price_rolling_vol_24h",
+  "price_rolling_mean_168h",
+  "price_rolling_vol_168h",
+  "hour_sin",
+  "hour_cos",
+  "dow_sin",
+  "dow_cos",
+  "month_sin",
+  "month_cos",
+  "weekend",
+  "weekend_hour_sin",
+  "weekend_hour_cos",
+  "post_15min_mtu"
+]
