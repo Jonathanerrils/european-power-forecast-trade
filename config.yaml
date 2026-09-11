@@ -1,6 +1,8 @@
 # =============================================================================
 # European Day-Ahead Power Forecast-to-Trade & Tail-Risk System
-# Central configuration. Change parameters here, not inline in scripts.
+# Project configuration and operational defaults.
+# Frozen experiment specifications may instead be enforced in code/contracts;
+# documentation-only sections below identify their authoritative source.
 # =============================================================================
 
 project:
@@ -40,14 +42,23 @@ decision:
   cutoff_timezone: "Europe/Berlin"
 
 splits:
-  # Chronological only. No shuffling. See src/splits.py
-  initial_train_end: "2023-12-31"
-  validation_start: "2024-01-01"
-  validation_end: "2024-12-31"
-  rolling_validation_start: "2025-01-01"
-  rolling_validation_end: "2025-12-31"
+  # holdout_start IS operationally read (cfg["splits"]["holdout_start"], by
+  # run_eda.py, to exclude 2026 rows from development-sample EDA by default)
+  # -- confirmed by direct search before this section was reduced, unlike
+  # every other key previously here. Keep this key exact and correct.
   holdout_start: "2026-01-01"
-  # holdout_end left null -> latest complete month, locked once holdout is run
+  # DOCUMENTATION ONLY below this point -- confirmed unread by any script
+  # (initial_train_end, validation_start, validation_end,
+  # rolling_validation_start, rolling_validation_end all previously here had
+  # zero references outside this file). The authoritative chronological
+  # split architecture (fold_1=2023, fold_2=2024, fold_3=Jan-Sep 2025,
+  # regime_stress_test=Oct-Dec 2025, final train through 2026-01-01 via
+  # get_final_train_window()) lives in src/splits.py, not here -- those
+  # removed keys described an older, simpler split the actual code has
+  # since superseded, and duplicating the current architecture here would
+  # only risk drifting out of sync again the same way it already had.
+  see: "src/splits.py"
+  holdout_protocol: "docs/holdout_protocol_v2.md"
 
 features:
   price_lags_hours: [24, 48, 168]
@@ -70,25 +81,47 @@ uncertainty:
   # 60 days, selected by a pre-registered sensitivity experiment across
   # [60, 90, 120, 180, 365] candidates (run_uncertainty_sensitivity.py),
   # scored by interval score on a common-row-corrected comparison
-  # (every candidate evaluated on the identical n=24,114 rows -- see
-  # README "Uncertainty quantification"). 180 was the original,
-  # provisional value (frozen as uncertainty_v2, kept for the historical
-  # record, not deleted). Changing this value again requires a new
-  # pre-registered sensitivity run, not an ad hoc edit -- see the
-  # "post-result tuning" discipline documented in README Process notes.
+  # (every candidate evaluated on the identical n=24,115 rows -- see
+  # docs/economic_contract_v2.md and README "Uncertainty quantification").
+  # This is the DELIVERY-DAY-SAFE corrected value (information_set_method=
+  # "delivery_day_safe", frozen artifact uncertainty_selected_v2_dayorigin) --
+  # the original hourly-information-set selection also chose 60 days
+  # (uncertainty_selected_v1, kept for the historical record, not deleted),
+  # and 180 was an even earlier provisional value (uncertainty_v2). Changing
+  # this value again requires a new pre-registered sensitivity run, not an
+  # ad hoc edit -- see the "post-result tuning" discipline documented in
+  # README Process notes. NOTE: run_uncertainty.py's consequential 3-argument
+  # form reads window_days directly from the named sensitivity run's own
+  # manifest, not from this config value -- this field is documentation of
+  # the current frozen selection, not itself the operational source for a
+  # real run.
   residual_window_days: 60
 
 strategy:
-  round_trip_efficiency_base: 0.90
-  round_trip_efficiency_sensitivity: [0.85, 0.90, 0.95]
-  transaction_cost_eur_mwh_base: 0.50
-  transaction_cost_eur_mwh_sensitivity: [0.0, 0.5, 1.0, 2.0]
-  no_trade_threshold_selection: "validation_only"
+  # This section is DOCUMENTATION ONLY -- no script in this repository reads
+  # cfg["strategy"] (confirmed by direct search before this note was added).
+  # The actual frozen economic parameters live in run_strategy_backtest.py's
+  # ETA_RT_PRIMARY / C_PRIMARY constants and are specified authoritatively in
+  # docs/economic_contract_v2.md (S0-S5, cost formula, 3x3 grid). An earlier
+  # version of this section contained stale, wrong, and unwired values
+  # (round_trip_efficiency_base: 0.90, a flat transaction_cost_eur_mwh model)
+  # that never matched the actual frozen strategy and risked being mistaken
+  # for a competing specification -- removed rather than "fixed," since a
+  # value nothing reads should not exist here at all, correct or not.
+  see: "docs/economic_contract_v2.md"
 
 risk:
-  var_confidence_levels: [0.95, 0.99]
-  rolling_window_trading_days: 500
-  extreme_regime_quantile: 0.95   # defined on TRAINING price distribution only
+  # DOCUMENTATION ONLY. The frozen development/holdout tail-risk method is
+  # empirical historical VaR/ES at 95% and 99%, implemented in
+  # run_strategy_tailrisk.py and frozen in docs/holdout_protocol_v2.md.
+  # Do not introduce rolling-window or alternative tail-model settings here;
+  # they are not part of the frozen experiment. An earlier version of this
+  # section contained rolling_window_trading_days and extreme_regime_quantile
+  # values that no code reads and that describe a method never actually run
+  # -- removed for the same reason strategy: was cleaned up above: an unread
+  # config value describing a different method than the one actually frozen
+  # is a dormant competing specification, not harmless documentation.
+  see: "docs/holdout_protocol_v2.md"
 
 logging:
   level: "INFO"
