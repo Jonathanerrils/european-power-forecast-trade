@@ -1,0 +1,10 @@
+{
+  "raw_delivery_days": 212,
+  "days_lag24_available": 212,
+  "days_full_available": 212,
+  "days_tier1_available": 212,
+  "days_uncertainty_full_available": 212,
+  "days_uncertainty_tier1_available": 212,
+  "days_excluded_for_incomplete_intraday_vector": 0,
+  "common_evaluation_days": 212
+}
