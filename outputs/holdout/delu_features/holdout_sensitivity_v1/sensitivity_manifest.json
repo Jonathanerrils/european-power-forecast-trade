@@ -1,0 +1,29 @@
+{
+  "generated_at_utc": "2026-09-14T09:37:20.238583+00:00",
+  "source_holdout_run_version": "holdout_v1",
+  "output_run_version": "holdout_sensitivity_v1",
+  "source_holdout_used": true,
+  "source_holdout_protocol_commit": "a2d1f9a79022ca1e2731d52803061825038c69f5",
+  "source_final_model_fit_commit": "54a7c2e77122134eca31a09798cc1614df1c634c",
+  "eta_rt_grid": [
+    0.7,
+    0.85,
+    0.92
+  ],
+  "c_grid": [
+    5,
+    10,
+    15
+  ],
+  "primary_eta_rt": 0.85,
+  "primary_c": 10.0,
+  "base_case_reproduction": "PASSED",
+  "float_reproduction_atol": 1e-09,
+  "n_common_holdout_days": 212,
+  "n_grid_cells": 9,
+  "n_positive_delta_forecast": 9,
+  "primary_delta_forecast": 1437.596375000001,
+  "section_8_verdict": "CONFIRMATION",
+  "holdout_used": true,
+  "classification_complete": true
+}
