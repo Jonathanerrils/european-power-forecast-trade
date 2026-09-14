@@ -1,0 +1,19 @@
+{
+  "generated_at_utc": "2026-09-14T10:56:13.395927+00:00",
+  "output_run_version": "holdout_report_v1",
+  "source_holdout_run_version": "holdout_v1",
+  "source_sensitivity_run_version": "holdout_sensitivity_v1",
+  "source_holdout_used": true,
+  "source_holdout_structural_invariants": "PASSED",
+  "source_sensitivity_base_case_reproduction": "PASSED",
+  "source_sensitivity_classification_complete": true,
+  "protocol_commit": "a2d1f9a79022ca1e2731d52803061825038c69f5",
+  "final_model_fit_commit": "54a7c2e77122134eca31a09798cc1614df1c634c",
+  "n_common_economic_days": 212,
+  "n_point_evaluation_rows": 5087,
+  "section_8_verdict": "CONFIRMATION",
+  "n_positive_delta_forecast_cells": 9,
+  "holdout_used": true,
+  "decision_recomputation_performed": false,
+  "forecast_recomputation_performed": false
+}

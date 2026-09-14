@@ -1,0 +1,20 @@
+{
+  "generated_at_utc": "2026-09-14T10:57:11.624365+00:00",
+  "output_run_version": "holdout_tailrisk_v1",
+  "source_holdout_run_version": "holdout_v1",
+  "source_holdout_used": true,
+  "source_holdout_structural_invariants": "PASSED",
+  "protocol_commit": "a2d1f9a79022ca1e2731d52803061825038c69f5",
+  "final_model_fit_commit": "54a7c2e77122134eca31a09798cc1614df1c634c",
+  "confidence_levels": [
+    0.95,
+    0.99
+  ],
+  "method": "empirical_historical",
+  "loss_definition": "L_D,s = -Pi_D,s",
+  "n_common_holdout_days": 212,
+  "low_precision_tail_threshold": 20,
+  "holdout_used": true,
+  "decision_recomputation_performed": false,
+  "forecast_recomputation_performed": false
+}

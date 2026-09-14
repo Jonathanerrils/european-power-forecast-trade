@@ -1,0 +1,103 @@
+==============================================================================
+FINAL 2026 HOLDOUT REPORT: holdout_report_v1
+Sources: holdout_v1 / holdout_sensitivity_v1
+==============================================================================
+
+--- 1. PROVENANCE AND EVALUATION POPULATION ---
+Frozen holdout: 2026-01-01 inclusive -> 2026-08-01 exclusive
+Raw holdout delivery days: 212
+Common economic evaluation days: 212
+Identical point-evaluation rows: 5087
+Primary economics: eta_rt=0.85, c=EUR 10
+Protocol commit: a2d1f9a79022ca1e2731d52803061825038c69f5; final model fit commit: 54a7c2e77122134eca31a09798cc1614df1c634c
+
+--- 2. POINT-FORECAST HOLDOUT METRICS ---
+        model       mae      rmse  median_ae    n
+        lag24 29.329123 46.855333  17.062500 5087
+       lag168 36.014137 56.598295  22.937500 5087
+ xgboost_full 17.512182 29.869118  11.991808 5087
+xgboost_tier1 24.360574 38.413680  15.770006 5087
+
+--- 3. PRIMARY STRATEGY TABLE ---
+strategy  trading_days  no_trade_days gross_pnl   net_pnl mean_daily_pnl median_daily_pnl profitable_day_rate trade_hit_rate worst_day
+      S0             0            212      0.00      0.00           0.00             0.00                0.0%            N/A      0.00
+      S1           208              4 22,412.42 18,564.42          87.57            85.97               84.0%          85.6%    -67.28
+      S2           210              2 23,887.02 20,002.02          94.35            93.69               91.0%          91.9%    -17.55
+      S3           160             52 22,090.01 19,130.01          90.24            91.36               75.0%          99.4%     -0.83
+      S4           205              7 23,010.91 19,218.41          90.65            89.09               86.8%          89.8%    -31.14
+      S5           117             95 16,885.73 14,721.23          69.44            55.88               54.7%          99.1%     -5.98
+
+--- 4. FOUR PREREGISTERED ECONOMIC DELTAS ---
+XGBoost value: S2 - S1 (PRIMARY): EUR 1,437.60
+Uncertainty value: S3 - S2: EUR -872.01
+Tier-1 cost: S4 - S2: EUR -783.61
+Tier-1 uncertainty cost: S5 - S3: EUR -4,408.77
+
+--- 5. FROZEN 3x3 SENSITIVITY / SECTION 8 VERDICT ---
+ eta_rt  c  delta_forecast  delta_uncertainty  delta_tier1  delta_tier1_u
+   0.70  5     1204.423250        -715.623750  -795.190000   -4727.128750
+   0.70 10     1050.049000        -613.819500  -679.268000   -5312.127500
+   0.70 15     1050.957500        -614.756500  -599.320000   -6135.266750
+   0.85  5     1386.136875        -816.087625  -731.908000   -4000.104375
+   0.85 10     1437.596375        -872.011000  -783.605125   -4408.774000
+   0.85 15     1364.730500       -1049.349000  -855.902375   -5670.249625
+   0.92  5     1439.213500        -775.919400  -759.948600   -3982.829200
+   0.92 10     1432.423200        -801.303400  -754.556000   -4543.094700
+   0.92 15     1449.808000       -1037.685600  -801.577200   -4501.674100
+delta_forecast positive cells: 9/9
+MECHANICAL SECTION 8 VERDICT: CONFIRMATION
+
+--- 6. UNCERTAINTY DECOMPOSITION ---
+S2_vs_S3:
+  point_strategy: S2
+  uncertainty_strategy: S3
+  profits_forgone: 952.4558749999999
+  losses_avoided: 80.444875
+  pair_selection_effect: 0.0
+  reverse_category_effect: 0.0
+S4_vs_S5:
+  point_strategy: S4
+  uncertainty_strategy: S5
+  profits_forgone: 4654.82425
+  losses_avoided: 157.64437500000003
+  pair_selection_effect: 0.0
+  reverse_category_effect: 0.0
+
+--- 7. DRAWDOWN / DOWNSIDE ---
+S0: worst_day=EUR 0.00; worst_rolling_5day=EUR 0.00; max_drawdown=EUR 0.00
+S1: worst_day=EUR -67.28; worst_rolling_5day=EUR -68.20; max_drawdown=EUR -154.77
+S2: worst_day=EUR -17.55; worst_rolling_5day=EUR -17.10; max_drawdown=EUR -22.61
+S3: worst_day=EUR -0.83; worst_rolling_5day=EUR -0.83; max_drawdown=EUR -0.83
+S4: worst_day=EUR -31.14; worst_rolling_5day=EUR -49.84; max_drawdown=EUR -53.10
+S5: worst_day=EUR -5.98; worst_rolling_5day=EUR -5.98; max_drawdown=EUR -5.98
+
+--- 8. ORACLE / VALUE CAPTURE ---
+Oracle total: EUR 21,243.10
+S0 value-capture ratio: 0.0%
+S1 value-capture ratio: 87.4%
+S2 value-capture ratio: 94.2%
+S3 value-capture ratio: 90.1%
+S4 value-capture ratio: 90.5%
+S5 value-capture ratio: 69.3%
+
+--- 9. P&L CONCENTRATION ---
+S0: top1=N/A, top5=N/A, top10=N/A
+S1: top1=8.8%, top5=20.6%, top10=31.3%
+S2: top1=8.0%, top5=18.6%, top10=28.4%
+S3: top1=8.4%, top5=19.5%, top10=29.7%
+S4: top1=7.6%, top5=18.8%, top10=29.2%
+S5: top1=9.9%, top5=23.8%, top10=36.7%
+
+--- 10. REGIME / STRESS-DAY DIAGNOSTICS ---
+Post-15min cutover split: {'true': {'n_days': 212, 'S0_net_pnl': 0.0, 'S1_net_pnl': 18564.422874999997, 'S2_net_pnl': 20002.019249999998, 'S3_net_pnl': 19130.00825, 'S4_net_pnl': 19218.414125, 'S5_net_pnl': 14721.23425, 'delta_forecast': 1437.596375000001, 'delta_uncertainty': -872.0109999999986, 'delta_tier1': -783.6051249999982, 'delta_tier1_u': -4408.773999999999}, 'false': {'n_days': 0}}
+negative_price_day: {'true': {'n_days': 69, 'S0_net_pnl': 0.0, 'S1_net_pnl': 9263.116124999999, 'S2_net_pnl': 9416.12875, 'S3_net_pnl': 9418.062875, 'S4_net_pnl': 9275.206124999999, 'S5_net_pnl': 7637.000375, 'delta_forecast': 153.0126250000012, 'delta_uncertainty': 1.9341249999997672, 'delta_tier1': -140.92262500000106, 'delta_tier1_u': -1781.0625}, 'false': {'n_days': 143, 'S0_net_pnl': 0.0, 'S1_net_pnl': 9301.306749999998, 'S2_net_pnl': 10585.8905, 'S3_net_pnl': 9711.945375, 'S4_net_pnl': 9943.207999999999, 'S5_net_pnl': 7084.233875, 'delta_forecast': 1284.5837500000016, 'delta_uncertainty': -873.9451250000002, 'delta_tier1': -642.6825000000008, 'delta_tier1_u': -2627.7114999999994}}
+gt200_day: {'true': {'n_days': 47, 'S0_net_pnl': 0.0, 'S1_net_pnl': 6654.636499999999, 'S2_net_pnl': 6917.23875, 'S3_net_pnl': 6489.0345, 'S4_net_pnl': 6774.174125, 'S5_net_pnl': 5687.46075, 'delta_forecast': 262.60225000000173, 'delta_uncertainty': -428.2042500000007, 'delta_tier1': -143.0646250000009, 'delta_tier1_u': -801.5737499999996}, 'false': {'n_days': 165, 'S0_net_pnl': 0.0, 'S1_net_pnl': 11909.786375, 'S2_net_pnl': 13084.780499999997, 'S3_net_pnl': 12640.973749999997, 'S4_net_pnl': 12444.24, 'S5_net_pnl': 9033.7735, 'delta_forecast': 1174.9941249999974, 'delta_uncertainty': -443.80674999999974, 'delta_tier1': -640.5404999999973, 'delta_tier1_u': -3607.200249999998}}
+gt500_day: {'true': {'n_days': 3, 'S0_net_pnl': 0.0, 'S1_net_pnl': 1079.759875, 'S2_net_pnl': 1079.759875, 'S3_net_pnl': 1079.759875, 'S4_net_pnl': 1079.759875, 'S5_net_pnl': 1079.759875, 'delta_forecast': 0.0, 'delta_uncertainty': 0.0, 'delta_tier1': 0.0, 'delta_tier1_u': 0.0}, 'false': {'n_days': 209, 'S0_net_pnl': 0.0, 'S1_net_pnl': 17484.662999999997, 'S2_net_pnl': 18922.259374999998, 'S3_net_pnl': 18050.248375, 'S4_net_pnl': 18138.65425, 'S5_net_pnl': 13641.474375, 'delta_forecast': 1437.596375000001, 'delta_uncertainty': -872.0109999999986, 'delta_tier1': -783.6051249999982, 'delta_tier1_u': -4408.773999999999}}
+
+--- 11. LIMITATIONS ---
+- Price-taking, stylized single-cycle day-ahead storage scheduling; no market impact.
+- Market transaction costs remain excluded (Cmarket=0); degradation cost follows the frozen contract.
+- Tier-2 wind/solar point-in-time public availability by 11:45 D-1 remains unresolved; Tier-1 is the robustness information set.
+- No capital/exposure model: no ROI, Sharpe, annualized return, or capital-efficiency claim.
+- Holdout currently covers 2026-01-01 through 2026-07-31 delivery dates only, per the frozen structural boundary.
+- Tail-risk precision, especially at 99%, is reported separately by run_final_holdout_tailrisk.py.

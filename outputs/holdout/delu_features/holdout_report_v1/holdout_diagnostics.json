@@ -1,0 +1,203 @@
+{
+  "named_deltas": {
+    "delta_forecast": 1437.596375000001,
+    "delta_uncertainty": -872.0109999999986,
+    "delta_tier1": -783.6051249999982,
+    "delta_tier1_u": -4408.773999999999
+  },
+  "drawdown": {
+    "S0": {
+      "worst_day": 0.0,
+      "worst_rolling_5day": 0.0,
+      "max_drawdown": 0.0
+    },
+    "S1": {
+      "worst_day": -67.280625,
+      "worst_rolling_5day": -68.20050000000003,
+      "max_drawdown": -154.76537500000018
+    },
+    "S2": {
+      "worst_day": -17.546750000000003,
+      "worst_rolling_5day": -17.100625000000008,
+      "max_drawdown": -22.607499999999845
+    },
+    "S3": {
+      "worst_day": -0.8269999999999982,
+      "worst_rolling_5day": -0.8269999999999982,
+      "max_drawdown": -0.8269999999999982
+    },
+    "S4": {
+      "worst_day": -31.142875000000004,
+      "worst_rolling_5day": -49.844875,
+      "max_drawdown": -53.0985
+    },
+    "S5": {
+      "worst_day": -5.978875000000002,
+      "worst_rolling_5day": -5.978875000000002,
+      "max_drawdown": -5.978875000000002
+    }
+  },
+  "concentration": {
+    "S0": {
+      "top_1pct_abs_eur": 0.0,
+      "top_1pct_pct_of_total": null,
+      "top_5pct_abs_eur": 0.0,
+      "top_5pct_pct_of_total": null,
+      "top_10pct_abs_eur": 0.0,
+      "top_10pct_pct_of_total": null
+    },
+    "S1": {
+      "top_1pct_abs_eur": 1633.1784999999998,
+      "top_1pct_pct_of_total": 0.08797356702100011,
+      "top_5pct_abs_eur": 3828.71375,
+      "top_5pct_pct_of_total": 0.2062393092303442,
+      "top_10pct_abs_eur": 5808.1975,
+      "top_10pct_pct_of_total": 0.3128671189569636
+    },
+    "S2": {
+      "top_1pct_abs_eur": 1609.6709999999996,
+      "top_1pct_pct_of_total": 0.08047542499990344,
+      "top_5pct_abs_eur": 3729.4763749999993,
+      "top_5pct_pct_of_total": 0.1864549937876897,
+      "top_10pct_abs_eur": 5684.447375,
+      "top_10pct_pct_of_total": 0.2841936758460024
+    },
+    "S3": {
+      "top_1pct_abs_eur": 1609.6709999999996,
+      "top_1pct_pct_of_total": 0.0841437692532098,
+      "top_5pct_abs_eur": 3729.4763749999993,
+      "top_5pct_pct_of_total": 0.1949542481248015,
+      "top_10pct_abs_eur": 5684.447375,
+      "top_10pct_pct_of_total": 0.2971481925524
+    },
+    "S4": {
+      "top_1pct_abs_eur": 1452.7585,
+      "top_1pct_pct_of_total": 0.0755920072567382,
+      "top_5pct_abs_eur": 3621.1024999999995,
+      "top_5pct_pct_of_total": 0.18841838231020008,
+      "top_10pct_abs_eur": 5603.31575,
+      "top_10pct_pct_of_total": 0.2915597360716151
+    },
+    "S5": {
+      "top_1pct_abs_eur": 1452.7585,
+      "top_1pct_pct_of_total": 0.0986845583277095,
+      "top_5pct_abs_eur": 3501.3379999999997,
+      "top_5pct_pct_of_total": 0.2378426931152189,
+      "top_10pct_abs_eur": 5398.15475,
+      "top_10pct_pct_of_total": 0.3666917228764293
+    }
+  },
+  "oracle_value_capture": {
+    "oracle_total": 21243.099,
+    "S0_vcr": 0.0,
+    "S1_vcr": 0.8739037027977885,
+    "S2_vcr": 0.9415772741067581,
+    "S3_vcr": 0.900528131512262,
+    "S4_vcr": 0.9046897594837741,
+    "S5_vcr": 0.6929890149266829
+  },
+  "regime_split": {
+    "true": {
+      "n_days": 212,
+      "S0_net_pnl": 0.0,
+      "S1_net_pnl": 18564.422874999997,
+      "S2_net_pnl": 20002.019249999998,
+      "S3_net_pnl": 19130.00825,
+      "S4_net_pnl": 19218.414125,
+      "S5_net_pnl": 14721.23425,
+      "delta_forecast": 1437.596375000001,
+      "delta_uncertainty": -872.0109999999986,
+      "delta_tier1": -783.6051249999982,
+      "delta_tier1_u": -4408.773999999999
+    },
+    "false": {
+      "n_days": 0
+    }
+  },
+  "stress_splits": {
+    "negative_price_day": {
+      "true": {
+        "n_days": 69,
+        "S0_net_pnl": 0.0,
+        "S1_net_pnl": 9263.116124999999,
+        "S2_net_pnl": 9416.12875,
+        "S3_net_pnl": 9418.062875,
+        "S4_net_pnl": 9275.206124999999,
+        "S5_net_pnl": 7637.000375,
+        "delta_forecast": 153.0126250000012,
+        "delta_uncertainty": 1.9341249999997672,
+        "delta_tier1": -140.92262500000106,
+        "delta_tier1_u": -1781.0625
+      },
+      "false": {
+        "n_days": 143,
+        "S0_net_pnl": 0.0,
+        "S1_net_pnl": 9301.306749999998,
+        "S2_net_pnl": 10585.8905,
+        "S3_net_pnl": 9711.945375,
+        "S4_net_pnl": 9943.207999999999,
+        "S5_net_pnl": 7084.233875,
+        "delta_forecast": 1284.5837500000016,
+        "delta_uncertainty": -873.9451250000002,
+        "delta_tier1": -642.6825000000008,
+        "delta_tier1_u": -2627.7114999999994
+      }
+    },
+    "gt200_day": {
+      "true": {
+        "n_days": 47,
+        "S0_net_pnl": 0.0,
+        "S1_net_pnl": 6654.636499999999,
+        "S2_net_pnl": 6917.23875,
+        "S3_net_pnl": 6489.0345,
+        "S4_net_pnl": 6774.174125,
+        "S5_net_pnl": 5687.46075,
+        "delta_forecast": 262.60225000000173,
+        "delta_uncertainty": -428.2042500000007,
+        "delta_tier1": -143.0646250000009,
+        "delta_tier1_u": -801.5737499999996
+      },
+      "false": {
+        "n_days": 165,
+        "S0_net_pnl": 0.0,
+        "S1_net_pnl": 11909.786375,
+        "S2_net_pnl": 13084.780499999997,
+        "S3_net_pnl": 12640.973749999997,
+        "S4_net_pnl": 12444.24,
+        "S5_net_pnl": 9033.7735,
+        "delta_forecast": 1174.9941249999974,
+        "delta_uncertainty": -443.80674999999974,
+        "delta_tier1": -640.5404999999973,
+        "delta_tier1_u": -3607.200249999998
+      }
+    },
+    "gt500_day": {
+      "true": {
+        "n_days": 3,
+        "S0_net_pnl": 0.0,
+        "S1_net_pnl": 1079.759875,
+        "S2_net_pnl": 1079.759875,
+        "S3_net_pnl": 1079.759875,
+        "S4_net_pnl": 1079.759875,
+        "S5_net_pnl": 1079.759875,
+        "delta_forecast": 0.0,
+        "delta_uncertainty": 0.0,
+        "delta_tier1": 0.0,
+        "delta_tier1_u": 0.0
+      },
+      "false": {
+        "n_days": 209,
+        "S0_net_pnl": 0.0,
+        "S1_net_pnl": 17484.662999999997,
+        "S2_net_pnl": 18922.259374999998,
+        "S3_net_pnl": 18050.248375,
+        "S4_net_pnl": 18138.65425,
+        "S5_net_pnl": 13641.474375,
+        "delta_forecast": 1437.596375000001,
+        "delta_uncertainty": -872.0109999999986,
+        "delta_tier1": -783.6051249999982,
+        "delta_tier1_u": -4408.773999999999
+      }
+    }
+  }
+}
