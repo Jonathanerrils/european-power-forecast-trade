@@ -22,7 +22,7 @@
 
 \graphicspath{{../outputs/eda/delu_features/development/development_a03fix_v1/figures/}}
 
-\journal{Journal target to be selected}
+\journal{Energy Economics}
 
 \newcommand{\EUR}[1]{€#1}
 
@@ -32,10 +32,9 @@
 
 \title{Forecast-to-Trade under Information Constraints: Frozen Out-of-Sample Evidence from the Germany--Luxembourg Day-Ahead Electricity Market}
 
-\author[inst1]{Author One}
-\author[inst2]{Author Two}
-\address[inst1]{Affiliation to be inserted}
-\address[inst2]{Affiliation to be inserted}
+\author{Jonathan Nelson\corref{cor1}}
+\cortext[cor1]{Corresponding author.}
+% Add the corresponding author's email address before submission.
 
 \begin{abstract}
 Electricity-price forecasts are commonly judged by statistical errors even though their operational value depends on the decisions they support. This study evaluates whether a forecasting advantage survives point-in-time information constraints and translates into economic value under a frozen out-of-sample protocol for the Germany--Luxembourg day-ahead market. Public ENTSO-E data from 2019--2025 are used for development, while January--July 2026 is reserved for a first-look holdout. The information set is split into a Full specification and a Tier-1 robustness specification that excludes wind- and solar-derived variables whose exact historical availability at the simulated 11:45 D-1 decision time cannot be verified. XGBoost is selected during development against naive and ElasticNet benchmarks, and uncertainty is estimated from delivery-day-safe empirical residual quantiles. Forecasts are then mapped into a pre-specified single-cycle storage decision rule with a frozen efficiency--cost sensitivity grid. On 5,087 holdout hours, Full XGBoost attains an MAE of \EUR{17.51}/MWh versus \EUR{29.33}/MWh for lag-24. Under the primary economic assumptions, the Full point strategy earns \EUR{20,002.02} compared with \EUR{18,564.42} for lag-24, and the incremental value remains positive in all nine pre-specified sensitivity cells. The uncertainty-aware Full strategy sacrifices \EUR{872.01} of aggregate P\&L but raises the trade hit rate from 91.9\% to 99.4\% and improves the worst day from \EUR{-17.55} to \EUR{-0.83}. Tier-1 remains superior to lag-24 but materially weaker than Full. The contribution is therefore methodological and evidential rather than algorithmic: forecast value is assessed under explicit information-timing boundaries, delivery-day-safe uncertainty, frozen pre-exposure rules, economic robustness and tail-risk diagnostics.
@@ -63,13 +62,13 @@ The complete research pipeline, frozen protocols, model artifacts, development o
 The authors declare no competing interests. This statement should be updated if necessary before submission.
 
 \section*{Funding}
-Funding information to be inserted before submission.
+This research received no external funding.
 
 \section*{Declaration of generative AI and AI-assisted technologies in the writing process}
 During preparation of this manuscript, the authors used ChatGPT to assist with language editing, manuscript organization and LaTeX preparation. The underlying research design, code, data analysis, interpretation and final verification remain the responsibility of the authors. This statement should be adapted to the policy of the target journal at submission.
 
 \section*{Acknowledgements}
-Acknowledgements to be inserted before submission.
+To be added before submission.
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references}
