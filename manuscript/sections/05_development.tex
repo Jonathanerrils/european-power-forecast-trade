@@ -1,0 +1,132 @@
+\section{Development evidence and model selection}
+\label{sec:development}
+
+\subsection{Point-forecast performance}
+
+Table~\ref{tab:dev_mae} summarizes MAE across the four chronological outer validation periods.
+
+\begin{table}[htbp]
+\centering
+\caption{Development-sample MAE by model and validation period (EUR/MWh).}
+\label{tab:dev_mae}
+\begin{tabular}{lrrrrrr}
+\toprule
+Validation & Lag-24 & Lag-168 & EN Full & EN Tier-1 & XGB Full & XGB Tier-1 \\
+\midrule
+2023 & 27.20 & 33.64 & 19.60 & 23.00 & \textbf{16.79} & 23.71 \\
+2024 & 27.82 & 32.79 & 20.91 & 24.60 & \textbf{16.36} & 22.67 \\
+Jan--Sep 2025 & 26.04 & 32.18 & 18.90 & 23.18 & \textbf{16.47} & 22.50 \\
+Oct--Dec 2025 & 25.76 & 34.71 & 20.00 & 24.44 & \textbf{15.64} & 23.13 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Full XGBoost has the lowest MAE in every outer fold. Relative to lag-24, the MAE reduction is approximately 38.3\% in 2023, 41.2\% in 2024, 36.7\% in January--September 2025 and 39.3\% in the October--December regime-stress period. The post-cutover result is particularly relevant because it shows that the forecasting advantage does not disappear immediately after the 15-minute SDAC transition.
+
+Tier-1 XGBoost also improves on lag-24 in every fold, but its error remains materially higher than Full XGBoost. This gap establishes that the renewable-related Tier-2 predictors carry substantial predictive information while simultaneously making their unresolved point-in-time status consequential.
+
+The row-weighted Full ElasticNet MAE is €19.898/MWh, while Full XGBoost attains €16.470/MWh. The relative reduction,
+\[
+\frac{19.898-16.470}{19.898}=17.2\%,
+\]
+exceeds the pre-specified 1\% promotion threshold. XGBoost was therefore promoted before uncertainty and economic evaluation.
+
+\subsection{Uncertainty-window selection}
+
+The delivery-day-safe residual-window comparison is reported in Table~\ref{tab:uncertainty_windows}.
+
+\begin{table}[htbp]
+\centering
+\caption{Development uncertainty-window selection.}
+\label{tab:uncertainty_windows}
+\begin{tabular}{rrrr}
+\toprule
+Window (days) & Empirical coverage & Mean width & Interval score \\
+\midrule
+60 & 0.7825 & \textbf{45.91} & \textbf{82.05} \\
+90 & 0.7816 & 46.58 & 82.94 \\
+120 & 0.7821 & 47.18 & 83.79 \\
+180 & 0.7889 & 48.18 & 84.59 \\
+365 & \textbf{0.7978} & 49.43 & 84.43 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 365-day window is closest to the nominal 80\% coverage but produces materially wider intervals. Under the frozen selection rule, the 60-day window wins because it has the lowest common-row Winkler score. Its empirical coverage by fold is 80.1\%, 78.6\%, 77.8\% and 79.1\%, respectively, all within the three-percentage-point diagnostic tolerance around the nominal level.
+
+\subsection{Development economic evidence}
+
+At the primary economic specification, 1,081 common development delivery days are available. Results are shown in Table~\ref{tab:dev_strategy}.
+
+\begin{table}[htbp]
+\centering
+\caption{Development-sample strategy results at eta=0.85 and c=€10.}
+\label{tab:dev_strategy}
+\begin{tabular}{lrrrrr}
+\toprule
+Strategy & Trading days & Net P\&L & Profitable days & Hit rate & Worst day \\
+\midrule
+S0 & 0 & 0.00 & 0.0\% & -- & 0.00 \\
+S1 & 1,043 & 56,609.15 & 81.7\% & 84.7\% & -77.64 \\
+S2 & 1,065 & \textbf{64,903.93} & \textbf{91.1\%} & 92.5\% & -28.00 \\
+S3 & 652 & 56,143.19 & 59.7\% & \textbf{98.9\%} & \textbf{-17.24} \\
+S4 & 1,046 & 58,179.08 & 83.7\% & 86.5\% & -56.82 \\
+S5 & 297 & 29,155.17 & 26.5\% & 96.6\% & -55.05 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The primary forecast-value contrast is
+\[
+\Delta_{forecast}=S2-S1=€8,294.78.
+\]
+The Full point strategy therefore converts the forecasting advantage into higher realized economic value during development.
+
+The Tier-1 cost is
+\[
+\Delta_{Tier1}=S4-S2=-€6,724.85,
+\]
+showing that restricting the information set materially reduces the development economic result.
+
+The primary forecast-value contrast is positive in all nine pre-specified efficiency--cost cells. Across the grid it ranges from €7,222.18 to €8,773.47. The Tier-1 contrast is negative in all nine cells.
+
+\subsection{Uncertainty as a selectivity mechanism}
+
+The development uncertainty contrast is
+\[
+\Delta_{uncertainty}=S3-S2=-€8,760.73.
+\]
+The sign is negative in all nine economic sensitivity cells. The decomposition shows that S3 forgoes approximately €9,339.10 of profitable opportunities while avoiding approximately €578.37 of losses.
+
+This pattern is accompanied by substantially lower trading frequency and better realized downside. S2 trades on 1,065 days with a hit rate of 92.5\%, whereas S3 trades on only 652 days with a hit rate of 98.9\%. The worst day improves from -€28.00 to -€17.24, and maximum drawdown improves from approximately -€37.51 to -€17.24.
+
+The uncertainty layer therefore behaves primarily as an abstention mechanism rather than a source of higher development profit.
+
+\subsection{Oracle value capture and tail risk}
+
+The development ex-post oracle produces €72,955.08. Value-capture ratios are 77.6\% for S1, 89.0\% for S2, 77.0\% for S3, 79.7\% for S4 and 40.0\% for S5.
+
+\begin{table}[htbp]
+\centering
+\caption{Development empirical daily-loss VaR and Expected Shortfall.}
+\label{tab:dev_tailrisk}
+\begin{tabular}{lrrrr}
+\toprule
+Strategy & VaR 95\% & ES 95\% & VaR 99\% & ES 99\% \\
+\midrule
+S1 & 14.21 & 25.04 & 28.40 & 46.90 \\
+S2 & 2.90 & 10.57 & 16.17 & 21.07 \\
+S3 & 0.00 & \textbf{0.61} & 0.00 & \textbf{3.03} \\
+S4 & 9.84 & 20.81 & 26.44 & 38.66 \\
+S5 & 0.00 & 3.06 & 0.00 & 15.32 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 99\% estimates rest on only about 10.8 effective tail observations and are therefore flagged as low precision.
+
+\subsection{Development conclusions and freeze}
+
+Four findings were carried into the final experiment. First, Full XGBoost satisfied the pre-specified promotion rule and outperformed every comparator across all outer folds. Second, Tier-1 retained predictive value but materially weakened both forecast and economic performance. Third, the mechanically selected uncertainty specification was a 60-day delivery-day-safe residual window. Fourth, the forecast-value contrast was positive in all nine development sensitivity cells, while uncertainty filtering consistently exchanged aggregate profit for greater selectivity and downside protection.
+
+These findings were treated as development evidence, not final confirmation. The point models were refitted under the frozen procedure, the uncertainty and economic contracts were locked, and only then was the 2026 holdout exposed.
