@@ -6,7 +6,7 @@ This directory contains the publication manuscript for the DE-LU forecast-to-tra
 
 Set `manuscript/main.tex` as the main document and compile with pdfLaTeX + BibTeX.
 
-The draft uses Elsevier's `elsarticle` class as a neutral starting point for journals such as Energy Economics, Applied Energy, or Energy Conversion and Management. The exact target-journal template can be applied later without changing the scientific content.
+The current first-choice target is **Energy Economics**. The draft uses Elsevier's `elsarticle` class, so retargeting later remains straightforward if editorial fit or reviewer feedback suggests another outlet.
 
 ## Overleaf workflow
 
