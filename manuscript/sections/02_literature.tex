@@ -1,0 +1,44 @@
+\section{Literature review and research positioning}
+\label{sec:literature}
+
+\subsection{Electricity price forecasting and credible comparison}
+
+Electricity price forecasting has developed from relatively compact time-series models into a broad field containing high-dimensional regression, machine learning, deep learning and probabilistic methods. The expansion reflects the unusual behavior of wholesale electricity prices: strong seasonal structure, spikes, negative prices and sensitivity to system fundamentals and market design \citep{weron2014}. The resulting empirical literature provides little support for assuming that one model class will dominate across all markets and periods. In a large multi-market comparison, \citet{zielweron2018} find that model structure and predictor choice matter materially and that no universal winner emerges between high-dimensional univariate and multivariate frameworks.
+
+The machine-learning literature has enlarged the set of credible models rather than removed the need for careful comparison. \citet{lagodeep2018} demonstrate strong performance from deep-learning approaches in a broad benchmark, while \citet{lago2021} emphasize that claims of model superiority are meaningful only when evaluation is based on transparent data, strong baselines, chronological testing and uncontaminated model selection. Their open benchmark and associated \texttt{epftoolbox} provide an important reproducibility reference for the present study.
+
+These lessons shape our forecasting design. Lag-24 and lag-168 forecasts are retained as simple market-aware baselines; ElasticNet represents a regularized linear benchmark; and XGBoost enters as a challenger rather than being presumed superior. The model choice is therefore an empirical result of the development sample, not the paper's novelty claim.
+
+\subsection{Fundamentals and the information available at the forecast origin}
+
+Electricity prices respond to expected system conditions, making load and renewable-generation forecasts natural predictors. High-dimensional German electricity-price models have long incorporated wind, solar and calendar information \citep{ziel2015}, while \citet{kathziel2018} use public load and renewable fundamentals in quarter-hourly German forecasting. Weather predictions also contain useful price information at longer horizons \citep{sgarlato2023}.
+
+However, predictive usefulness and point-in-time availability are distinct. Historical databases frequently store a final or revised forecast series without preserving every publication vintage. A variable that is observable to the researcher today is not automatically one that would have been observable at the simulated decision time.
+
+This distinction is central to the present study. Regulation (EU) No 543/2013 requires day-ahead load forecasts to be published no later than two hours before the relevant day-ahead gate closure, whereas day-ahead wind and solar generation forecasts are required no later than 18:00 Brussels time on D-1 \citep{eureg543}. With the regular SDAC order book closing at 12:00 \citep{epex2025}, the regulatory deadline for load is compatible with an 11:45 cutoff, while the renewable deadline is not. The historical API also does not expose the complete publication-vintage history required to establish the exact timestamp of the stored renewable forecast. Our Full/Tier-1 design therefore makes the uncertainty around information availability visible rather than assuming it away.
+
+\subsection{From forecast accuracy to economic value}
+
+Forecasts acquire operational value through the decisions they change. Storage arbitrage provides a natural test because its value depends on identifying low-price and high-price intervals. Foundational storage studies establish the economic importance of temporal price spreads and the sensitivity of value to efficiency and operating assumptions \citep{sioshansi2009}. More recent European evidence documents substantial day-ahead arbitrage opportunities across markets \citep{mercier2023}. Yet perfect-foresight storage optimization is an upper bound rather than a test of a real forecasting system.
+
+The distinction between perfect and forecast-based information has therefore become increasingly important. \citet{sharma2021} review forecasting in energy-storage applications and caution against operational conclusions based only on perfect or artificial forecasts. \citet{prakash2025} similarly show that the quality of future pricing information materially influences storage scheduling value.
+
+\citet{kathziel2018} provide a particularly close conceptual predecessor by explicitly quantifying the economic gains from more accurate German electricity-price forecasts. Their work establishes that forecast improvements can produce measurable economic value, but also that the decision rule matters. More recently, \citet{serafin2025} show that forecasting loss functions can change both profits and risk, and that costs and trading frequency affect economic rankings.
+
+The closest contemporary comparator is \citet{maciejowska2026}. Using 192 forecast specifications for the German/Germany--Luxembourg day-ahead market, they show that MAE and RMSE are only weakly associated with BESS profits and that measures capturing intraday shape and extrema can be more economically informative. This evidence makes an important novelty boundary explicit: the proposition that lower statistical error need not imply higher storage value is established prior art. Our contribution lies instead in testing forecast value under a frozen point-in-time information and economic protocol.
+
+\subsection{Probabilistic forecasting and decision quality}
+
+Point forecasts suppress uncertainty that may be highly relevant in a volatile electricity market. Probabilistic electricity-price forecasting therefore evaluates both calibration and sharpness \citep{nowotarski2018}. Regularized quantile regression averaging can improve the robustness of probabilistic forecasts and can support profitable decisions in some settings \citep{uniejewskiweron2021}. Modern distributional neural networks likewise connect probabilistic performance with economically relevant forecast evaluation \citep{marcjasz2023}. These approaches sit within the broader theory of proper scoring rules, where the statistical objective is to reward honest predictive distributions \citep{gneiting2007}.
+
+Better statistical uncertainty, however, does not guarantee better decisions. \citet{nitka2023} show that a CRPS-optimized combination of predictive electricity-price distributions can be statistically more accurate without generating higher trading profit than a simpler aggregation scheme. This result parallels the point-forecast literature and motivates evaluating our uncertainty layer through its actual decision consequences rather than assuming that improved interval behavior must increase P\&L.
+
+The present uncertainty method is deliberately simple: rolling empirical residual quantiles are applied to the selected point forecasts. The methodological emphasis is not a new probabilistic model but information-set discipline. The entire delivery day is decided at D-1 11:45; consequently, no realized residual from day \(D\) may influence any uncertainty bound for day \(D\). This day-origin restriction distinguishes the final implementation from ordinary sequential hourly rolling intervals.
+
+\subsection{Research gap}
+
+The literature establishes that EPF is market-specific, that fundamentals can add predictive value, that accuracy and economic value can diverge, and that probabilistic improvements may or may not enhance realized decisions. It also establishes that costs, efficiency and trading frequency matter for economic evaluation \citep{serafin2025,maciejowska2026}.
+
+The gap addressed here concerns how these strands are combined under a single pre-exposure research design. First, the historical information boundary is explicit through Full and Tier-1 information sets. Second, model selection, uncertainty selection and the economic strategy are frozen before final outcome exposure. Third, the primary economic conclusion must survive a pre-specified nine-cell efficiency--cost grid rather than one favorable operating assumption. Fourth, uncertainty is constructed at the same whole-day information origin as the decision problem. Finally, profit, abstention, downside, oracle value capture and empirical tail risk are reported jointly.
+
+The resulting contribution is therefore not a new forecasting architecture. It is a controlled forecast-to-trade experiment that asks a narrower question with stronger evidential discipline: does a forecasting improvement developed on public market data survive an untouched period, remain economically useful under pre-specified operating assumptions, and how does that conclusion change when information restrictions and uncertainty are imposed?
