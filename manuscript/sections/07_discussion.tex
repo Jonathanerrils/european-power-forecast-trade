@@ -1,0 +1,80 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Forecast accuracy survived the holdout, but economic value was not proportional to it}
+
+The Full XGBoost pipeline generalized beyond development. Its holdout MAE is approximately 40\% below lag-24, and its economic advantage over the lag strategy remains positive in every pre-specified efficiency--cost cell. The contribution is not that a nonlinear model beat a naive benchmark. Such comparisons are common in electricity-price forecasting \citep{lago2021}. The stronger evidence is that the advantage was carried through a frozen downstream decision rule and remained positive in a separate first-look period.
+
+The magnitude of the statistical and economic improvements differs considerably. A roughly 40\% MAE reduction produces only about a 7.7\% increase in cumulative net P\&L at the primary economic setting. This difference is consistent with established evidence. \citet{kathziel2018} show that forecast quality can translate into economic gains, while \citet{maciejowska2026} demonstrate in a closely related German/DE-LU storage setting that MAE and RMSE are only weakly associated with BESS profit. Our holdout adds complementary evidence: a large statistical improvement can survive economically, but its economic magnitude is decision-specific and much smaller than the statistical percentage improvement.
+
+This matters for how forecasting studies should describe improved models. Statistical forecast rankings remain necessary, but they are insufficient whenever the forecast is intended to support an operational decision. Economic evaluation should be treated as a separate objective rather than an automatic consequence of lower MAE.
+
+\subsection{Information timing is part of model validity}
+
+The Full/Tier-1 comparison reveals a second central result. Renewable-derived variables materially improve both predictive and economic performance. Full XGBoost beats Tier-1 on the 2026 holdout, and the Full point strategy earns more in every economic sensitivity cell.
+
+It would be tempting to interpret this simply as evidence that additional renewable fundamentals improve forecasting. That conclusion is only partly justified. Prior literature already supports the predictive value of renewable and weather information \citep{ziel2015,kathziel2018,sgarlato2023}. The unresolved issue here is whether the exact historical ENTSO-E renewable forecast values used by the Full model were publicly available at 11:45 D-1.
+
+The evidence boundary is concrete. The regulatory load-forecast deadline is compatible with the cutoff, while the wind/solar deadline is later \citep{eureg543}. The historical interface does not preserve the complete vintage history needed to determine whether an earlier renewable forecast happened to exist for each day. Therefore the Full model's edge is real in the stored historical dataset, but its strict point-in-time reproducibility remains unproven.
+
+Tier-1 is informative precisely because it prevents this limitation from becoming binary. The robust conclusion is not that the Full result is invalid, and not that timing does not matter. Instead, part of the advantage survives under the more defensible Tier-1 information set: Tier-1 XGBoost still reduces MAE relative to lag-24 and produces higher net P\&L. The additional Full advantage is economically meaningful, but its real-time interpretation should remain conditional on establishing the appropriate forecast vintage.
+
+This suggests a broader methodological lesson. In public-data forecasting, information availability should be treated as a property of the versioned observation at the forecast origin, not simply as a property of the variable name.
+
+\subsection{Uncertainty improved selectivity rather than total profit}
+
+The uncertainty result resists a one-dimensional interpretation. The 60-day residual method was selected statistically through an interval-score rule. In the economic layer, however, adding that uncertainty information reduces cumulative P\&L in both development and holdout.
+
+This does not mean the uncertainty layer failed. It changed a different dimension of performance. In the holdout, S3 raises the trade hit rate to 99.4\%, improves the worst day to only -€0.83, and nearly eliminates measured drawdown under the stylized contract. Mechanically, it does this by abstaining. When S2 and S3 both trade, they always choose the same pair. The uncertainty filter therefore does not discover different intraday extrema; it refuses marginal opportunities that the point forecast would take.
+
+That behavior aligns closely with the distinction emphasized by \citet{nitka2023}: a better probabilistic forecast or scoring rule need not imply greater realized profit under a downstream decision. It also complements positive evidence from regularized probabilistic methods such as \citet{uniejewskiweron2021} and distributional approaches such as \citet{marcjasz2023}. The economic effect of uncertainty is not universal; it depends on how the distribution enters the decision rule.
+
+Our decomposition makes the mechanism transparent. S3 forgoes €952.46 of profitable holdout opportunities while avoiding only €80.44 of losses. The value of the filter is therefore primarily downside control, not higher expected profit.
+
+This distinction prevents two opposite overstatements. It would be wrong to conclude that probabilistic information is economically useless merely because cumulative P\&L falls. It would also be wrong to describe the filter as economically superior without specifying the objective. An operator maximizing aggregate profit would prefer S2 under the tested contract; an operator placing greater weight on avoiding losing trades might value S3 differently.
+
+\subsection{Economic robustness and what the nine-cell result shows}
+
+The 9/9 holdout confirmation is the strongest preregistered economic result in the study. It reduces dependence on one arbitrary choice of round-trip efficiency or degradation cost. The forecast-value contrast remains positive under all nine pre-specified combinations, including lower efficiency and higher degradation cost.
+
+However, this grid is not a universal robustness proof. It varies two economically important assumptions while holding several others fixed. Market transaction cost is zero, market impact is absent, one cycle per day is allowed, and there is no inter-day state-of-charge constraint. As \citet{serafin2025} show, operating costs can change model rankings, while \citet{veenstra2025} emphasize that endogenous prices can matter as battery participation grows. The present sensitivity analysis should therefore be read as robustness within a clearly defined stylized contract, not as a complete commercial battery assessment.
+
+The oracle comparison reinforces the same point. S2 captures 94.2\% of the simplified perfect-hindsight oracle, but this is not 94.2\% of all theoretically available battery revenue. It is 94.2\% of the value available to an oracle constrained to the same single-cycle daily rule and cost convention.
+
+\subsection{The 2025 market-design transition}
+
+All 2026 holdout observations lie after the 15-minute SDAC transition. This makes the holdout a meaningful structural stress test of a model developed primarily on the prior hourly market regime.
+
+The pipeline explicitly handles the transition by selecting the appropriate market product, reconstructing A03 curves, averaging post-cutover quarter-hourly prices to hourly values and including a regime indicator. Full XGBoost had already retained its advantage in the October--December 2025 regime-stress fold, and the 2026 holdout extends that evidence over a longer post-transition period.
+
+At the same time, the study does not model 15-minute decision-making. Aggregating the new market to hourly resolution intentionally sacrifices within-hour variation. A future extension should forecast and optimize directly at 15-minute resolution once a sufficiently long post-transition history is available. That would answer a different operational question and should not be retrofitted into the present frozen experiment.
+
+\subsection{Strength of the holdout design}
+
+The holdout protocol does not eliminate every source of uncertainty, but it changes the evidential status of the final results. The 2026 period was structurally ingested and checked before the outcome evaluation, yet its prices were not used for model selection, uncertainty-window choice, strategy tuning or economic interpretation. The final model-fit procedure, economic contract and confirmation rule were committed before the first metric was exposed.
+
+This is consistent with the uncontaminated chronological testing emphasized by \citet{lago2021}, but the present workflow extends it into the downstream economic layer. Not only model hyperparameters but also uncertainty windows, efficiency/cost sensitivity, strategy definitions and the success criterion were frozen.
+
+The development history also preserves corrections rather than hiding them. Price-product selection, local delivery-day cutovers, DST-safe lags, A03 reconstruction and the delivery-day uncertainty correction were all addressed before final holdout exposure, with superseded artifacts retained as an audit trail. Reproducibility therefore includes not only the ability to rerun final code but also the ability to understand how consequential methodological errors were found and corrected.
+
+\subsection{Limitations}
+
+Several limitations materially constrain interpretation.
+
+First, Tier-2 point-in-time availability remains unresolved. The Full model should not be described as a deployable 11:45 D-1 system until appropriate historical or live publication vintages are independently verified.
+
+Second, the economic model is intentionally stylized. It assumes price-taking, one charge-discharge cycle per day, no inter-day energy carry, zero explicit exchange/clearing/brokerage cost, and no market impact. It also omits capital expenditure, financing, ancillary services and battery-health dynamics beyond the fixed throughput degradation cost.
+
+Third, uncertainty is based on marginal empirical residual quantiles. It does not model the multivariate dependence structure of the full delivery-day price vector. Richer multivariate probabilistic post-processing could support different storage decisions, but introducing it after the holdout would constitute a new experiment rather than an extension of the frozen result.
+
+Fourth, the holdout covers only seven months and one post-transition market regime. Tail-risk precision is particularly weak: 99\% VaR/ES rests on approximately two effective observations. Those values are descriptive and should not be treated as stable extreme-risk estimates.
+
+Fifth, formal statistical-significance testing was not part of the pre-registered confirmation rule. Predictive-comparison tools such as Diebold--Mariano or conditional predictive-ability tests \citep{diebold1995,giacomini2006} could be reported as supplementary post-hoc inference, but they should remain clearly separated from the frozen primary result.
+
+\subsection{Implications for forecast-to-decision research}
+
+Three broader implications follow. First, point-in-time data provenance deserves the same status as model architecture. A sophisticated model estimated on uncertain vintages can provide a less defensible result than a simpler model estimated on a clearly admissible information set.
+
+Second, uncertainty should be evaluated according to the decision objective it changes. Statistical calibration, cumulative profit, trade hit rate and downside risk are distinct outcomes and need not improve together.
+
+Third, final economic evaluation should be protected from the same adaptive overfitting that forecasting researchers recognize at the model-selection stage. Once thresholds, costs, filters and sensitivity grids are chosen after viewing test profits, the economic backtest itself becomes a tuning exercise. Freezing the full forecast-to-decision contract before outcome exposure provides a practical way to reduce this risk.
