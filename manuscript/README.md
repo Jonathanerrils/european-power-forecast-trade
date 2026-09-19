@@ -4,7 +4,7 @@ This directory contains the publication manuscript for the DE-LU forecast-to-tra
 
 ## Compile
 
-Set `manuscript/main.tex` as the main document and compile with pdfLaTeX + BibTeX.
+Set the repository-root `main.tex` as the main document and compile with pdfLaTeX + BibTeX. The root wrapper imports `manuscript/main.tex` so all manuscript-relative paths remain intact.
 
 The current first-choice target is **Energy Economics**. The draft uses Elsevier's `elsarticle` class, so retargeting later remains straightforward if editorial fit or reviewer feedback suggests another outlet.
 
@@ -12,9 +12,9 @@ The current first-choice target is **Energy Economics**. The draft uses Elsevier
 
 1. Import or Git-sync the repository in Overleaf.
 2. Use the branch `manuscript/overleaf-draft-v1`.
-3. Set `manuscript/main.tex` as the main file.
+3. Set the repository-root `main.tex` as the main file.
 4. The manuscript references EDA figures already stored in the repository.
-5. Replace placeholder authors, affiliations, funding and acknowledgements before submission.
+5. Author, KNUST affiliation, corresponding-author email and no-funding statement are already populated; acknowledgements remain to be added before submission.
 6. Adapt the AI-assistance declaration to the chosen journal's current policy.
 
 ## Scientific source of truth
