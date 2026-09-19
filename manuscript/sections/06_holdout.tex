@@ -1,0 +1,143 @@
+\section{Frozen 2026 holdout results}
+\label{sec:holdout}
+
+\subsection{Evaluation population and point forecasting}
+
+The frozen holdout covers 212 delivery days from 1 January through 31 July 2026. All 212 days satisfy the common economic-evaluation requirements. The point-forecast comparison contains 5,087 identical hourly observations.
+
+\begin{table}[htbp]
+\centering
+\caption{Point-forecast performance in the frozen 2026 holdout.}
+\label{tab:holdout_forecasts}
+\begin{tabular}{lrrrr}
+\toprule
+Model & MAE & RMSE & Median AE & \(N\) \\
+\midrule
+Lag-24 & 29.33 & 46.86 & 17.06 & 5,087 \\
+Lag-168 & 36.01 & 56.60 & 22.94 & 5,087 \\
+XGBoost Full & \textbf{17.51} & \textbf{29.87} & \textbf{11.99} & 5,087 \\
+XGBoost Tier-1 & 24.36 & 38.41 & 15.77 & 5,087 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Full XGBoost reduces MAE by approximately 40.3\% relative to lag-24 and 51.4\% relative to lag-168. Tier-1 XGBoost also improves upon lag-24, with an MAE approximately 16.9\% lower, but remains materially weaker than Full.
+
+\subsection{Primary economic results}
+
+\begin{table}[htbp]
+\centering
+\caption{Frozen holdout strategy results at eta=0.85 and c=€10.}
+\label{tab:holdout_strategy}
+\begin{tabular}{lrrrrr}
+\toprule
+Strategy & Trading days & Net P\&L & Profitable days & Hit rate & Worst day \\
+\midrule
+S0 & 0 & 0.00 & 0.0\% & -- & 0.00 \\
+S1 & 208 & 18,564.42 & 84.0\% & 85.6\% & -67.28 \\
+S2 & 210 & \textbf{20,002.02} & \textbf{91.0\%} & 91.9\% & -17.55 \\
+S3 & 160 & 19,130.01 & 75.0\% & \textbf{99.4\%} & \textbf{-0.83} \\
+S4 & 205 & 19,218.41 & 86.8\% & 89.8\% & -31.14 \\
+S5 & 117 & 14,721.23 & 54.7\% & 99.1\% & -5.98 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The primary contrast is
+\[
+\Delta_{forecast}=S2-S1=€1,437.60.
+\]
+Thus the Full XGBoost point strategy earns approximately 7.7\% more cumulative net P\&L than the lag-24 strategy under the primary assumptions.
+
+\subsection{Pre-specified nine-cell confirmation test}
+
+\begin{table}[htbp]
+\centering
+\caption{Frozen holdout \(S2-S1\) sensitivity grid (EUR).}
+\label{tab:holdout_grid}
+\begin{tabular}{rrrr}
+\toprule
+\(\eta_{rt}\) & \(c=5\) & \(c=10\) & \(c=15\) \\
+\midrule
+0.70 & 1,204.42 & 1,050.05 & 1,050.96 \\
+0.85 & 1,386.14 & \textbf{1,437.60} & 1,364.73 \\
+0.92 & 1,439.21 & 1,432.42 & 1,449.81 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The contrast is positive in all nine cells. Under the mechanical rule specified before holdout exposure, the primary forecast-value result therefore meets the criterion for \emph{confirmation}. The classification applies specifically to S2 over S1 under the frozen stylized contract; it does not imply confirmation of every secondary development finding.
+
+\subsection{Uncertainty filtering}
+
+The Full uncertainty-aware strategy earns €19,130.01 compared with €20,002.02 for S2, so
+\[
+\Delta_{uncertainty}=-€872.01.
+\]
+
+S2 and S3 both abstain on two days; S2 trades while S3 abstains on 50 days; both trade on 160 days; and whenever both trade, they select the same charge-discharge pair. S3 never trades when S2 abstains.
+
+The uncertainty filter therefore acts almost entirely through abstention. It forgoes €952.46 of profitable opportunities and avoids €80.44 of losses, exactly reconciling to the -€872.01 total gap.
+
+The reduction in aggregate profit is accompanied by substantial downside improvement. The hit rate rises from 91.9\% to 99.4\%, the worst day improves from -€17.55 to -€0.83, and maximum drawdown improves from approximately -€22.61 to -€0.83.
+
+\subsection{Tier-1 robustness}
+
+At the primary parameters,
+\[
+S4=€19,218.41,
+\]
+giving
+\[
+\Delta_{Tier1}=S4-S2=-€783.61.
+\]
+The Tier-1 contrast is negative in all nine sensitivity cells.
+
+However, Tier-1 still exceeds lag-24:
+\[
+S4-S1=€653.99.
+\]
+The same pattern appears in forecast accuracy: Tier-1 materially improves on lag-24 but remains weaker than Full.
+
+Applying the uncertainty filter to Tier-1 produces S5, which trades on only 117 days with a 99.1\% hit rate and earns €14,721.23. It forgoes €4,654.82 of profitable outcomes while avoiding only €157.64 of losses relative to S4.
+
+\subsection{Oracle value capture}
+
+The ex-post oracle earns €21,243.10. The corresponding value-capture ratios are 87.4\% for S1, 94.2\% for S2, 90.1\% for S3, 90.5\% for S4 and 69.3\% for S5.
+
+S2 therefore captures 94.2\% of the value available to the simplified perfect-hindsight oracle under the same one-cycle constraint. This ratio is a diagnostic property of the research contract, not an estimate of the fraction of real-world battery value captured.
+
+\subsection{Tail-risk evidence}
+
+\begin{table}[htbp]
+\centering
+\caption{Frozen holdout empirical daily-loss VaR and Expected Shortfall.}
+\label{tab:holdout_tailrisk}
+\begin{tabular}{lrrrr}
+\toprule
+Strategy & VaR 95\% & ES 95\% & VaR 99\% & ES 99\% \\
+\midrule
+S1 & 9.72 & 26.16 & 29.64 & 48.31 \\
+S2 & 2.07 & 7.07 & 8.35 & 13.45 \\
+S3 & 0.00 & \textbf{0.08} & 0.00 & \textbf{0.39} \\
+S4 & 5.09 & 13.02 & 20.60 & 26.82 \\
+S5 & 0.00 & 0.56 & 0.00 & 2.82 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The holdout sample is too small for precise tail estimation. The 95\% tail contains only 10.6 effective observations and the 99\% tail 2.12. All holdout VaR and ES estimates are therefore flagged as low precision and used descriptively only.
+
+\subsection{Stress-price days and concentration}
+
+The holdout contains 69 negative-price days, 47 days with a price above €200/MWh and three days above €500/MWh. On negative-price days,
+\[
+\Delta_{forecast}=€153.01,
+\]
+while on the remaining days it is €1,284.58. On days above €200/MWh, the contrast remains positive at €262.60. The three days above €500/MWh yield identical cumulative P\&L across active strategies, so no separate inference is drawn from that very small subgroup.
+
+S2's profits are not dominated by one extreme day: the top 1\%, 5\% and 10\% of holdout days account for 8.0\%, 18.6\% and 28.4\% of total S2 net P\&L, respectively.
+
+\subsection{Holdout summary}
+
+The first-look 2026 evidence supports the primary forecast-value result. Full XGBoost retains a large accuracy advantage, the economic contrast \(S2-S1\) is positive at the primary setting and in all nine pre-specified sensitivity cells, and Tier-1 retains a smaller but positive edge over lag-24. Uncertainty filtering again trades aggregate profit for substantially greater selectivity and downside protection.
