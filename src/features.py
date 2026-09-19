@@ -19,8 +19,8 @@ verified against the actual EU Transparency Regulation
 
     - WIND/SOLAR FORECAST at (D, h): Tier 2, not compatible with the
       cutoff even at the level of the regulatory deadline.
-      Article 14(2)(d) only requires publication by 17:00 D-1 -- nearly
-      5 hours AFTER our decision cutoff -- with updates continuing
+      Article 14(2)(d) only requires publication by 18:00 Brussels time D-1 --
+      more than 6 hours AFTER our 11:45 decision cutoff -- with updates continuing
       through intraday trading. We cannot reconstruct historical
       publication timestamps to prove any specific historical value
       predates 11:45. This is a real, verified point-in-time gap, not

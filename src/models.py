@@ -68,7 +68,7 @@ ELASTICNET_PREDICTOR_COLS: List[str] = [
 # renewable_share_forecast, which features.py's FEATURE_AVAILABILITY_TIER
 # tags as Tier 2 (not compatible with the 11:45 D-1 decision cutoff --
 # EU Reg. 543/2013 Art. 14(2)(d) only guarantees wind/solar forecasts by
-# 17:00 D-1). Running this alongside the full model turns a documented
+# 18:00 Brussels time D-1). Running this alongside the full model turns a documented
 # limitation into an actual robustness experiment: how much of the full
 # model's improvement survives using only the load forecast, whose
 # regulatory publication deadline is compatible with the 11:45 D-1
