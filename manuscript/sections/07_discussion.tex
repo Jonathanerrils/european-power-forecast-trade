@@ -9,6 +9,13 @@ The magnitude of the statistical and economic improvements differs considerably.
 
 This matters for how forecasting studies should describe improved models. Statistical forecast rankings remain necessary, but they are insufficient whenever the forecast is intended to support an operational decision. Economic evaluation should be treated as a separate objective rather than an automatic consequence of lower MAE.
 
+\subsection{Stronger simple baselines narrow the economic advantage}
+
+The post-hoc robustness analysis materially sharpens the interpretation of the primary result. On the common 205-day sample, Full XGBoost remains much more accurate than a trailing seven-day hourly mean profile (MAE 17.51 versus 29.28), yet the corresponding net-P\&L gap is only €238.04. A seven-day moving-block bootstrap interval for that post-hoc contrast includes zero. Thus the main frozen conclusion---that S2 beats the pre-specified lag-24 benchmark---survives, but a stronger simple economic benchmark captures most of that value.
+
+This finding reinforces rather than contradicts the paper's central forecast-to-decision argument. Economic value depends on which forecast errors affect the charge/discharge ranking. A simple recurring hourly profile can be economically competitive even when its aggregate point-forecast error is substantially larger. The result therefore cautions against interpreting the S2--S1 contrast as evidence that nonlinear machine learning is required to extract most of the tested arbitrage value.
+
+The stronger baselines were introduced only after holdout exposure, so they cannot replace the original frozen confirmation test. They instead define a more demanding benchmark for future untouched evaluation periods.
 \subsection{Information timing is part of model validity}
 
 The Full/Tier-1 comparison reveals a second central result. Renewable-derived variables materially improve both predictive and economic performance. Full XGBoost beats Tier-1 on the 2026 holdout, and the Full point strategy earns more in every economic sensitivity cell.
@@ -64,7 +71,7 @@ First, Tier-2 point-in-time availability remains unresolved. The Full model shou
 
 Second, the economic model is intentionally stylized. It assumes price-taking, one normalized 1-MWh charge in a single hourly interval followed by one later discharge per day, no inter-day energy carry, zero explicit exchange/clearing/brokerage cost, and no market impact. Reported P\&L is therefore in euros per normalized daily 1-MWh opportunity rather than a return on an actual battery asset. The model also omits capital expenditure, financing, ancillary services and battery-health dynamics beyond the fixed throughput degradation cost.
 
-Third, uncertainty is based on marginal empirical residual quantiles pooled across delivery hours. This pooling creates the exact day-varying abstention-threshold structure derived above and does not model hour-specific heteroskedasticity or the multivariate dependence structure of the full delivery-day price vector. Hour-specific or multivariate probabilistic post-processing could support genuinely different storage decisions, but introducing it after the holdout would constitute a new experiment rather than an extension of the frozen result.
+Third, uncertainty is based on marginal empirical residual quantiles pooled across delivery hours. This pooling creates the exact day-varying abstention-threshold structure derived above and does not model hour-specific heteroskedasticity or the multivariate dependence structure of the full delivery-day price vector. Post-hoc holdout diagnostics show 77.1\% Full coverage for the nominal 80\% interval, with meaningful variation across months and delivery hours; Tier-1 obtains similar overall coverage only with materially wider intervals. Hour-specific or multivariate probabilistic post-processing could support genuinely different storage decisions, but introducing it after the holdout would constitute a new experiment rather than an extension of the frozen result.
 
 Fourth, the holdout covers only seven months and one post-transition market regime. Tail-risk precision is particularly weak: 99\% VaR/ES rests on approximately two effective observations. Those values are descriptive and should not be treated as stable extreme-risk estimates.
 
