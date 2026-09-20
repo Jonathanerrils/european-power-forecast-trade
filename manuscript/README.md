@@ -14,7 +14,7 @@ The current first-choice target is **Energy Economics**. The draft uses Elsevier
 2. Use the branch `manuscript/overleaf-draft-v1`.
 3. Set the repository-root `main.tex` as the main file.
 4. The manuscript references EDA figures already stored in the repository.
-5. Author, KNUST affiliation, corresponding-author email and no-funding statement are already populated; acknowledgements remain to be added before submission.
+5. Final author name, KNUST affiliation, corresponding-author email, acknowledgements and no-funding statement are populated.
 6. The AI-assistance declaration has been updated to Elsevier's current journal policy; recheck the policy immediately before submission.
 
 ## Scientific source of truth
