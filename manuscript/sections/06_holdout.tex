@@ -167,6 +167,79 @@ while on the remaining days it is €1,284.58. On days above €200/MWh, the con
 
 S2's profits are not dominated by one extreme day: the top 1\%, 5\% and 10\% of holdout days account for 8.0\%, 18.6\% and 28.4\% of total S2 net P\&L, respectively.
 
+\subsection{Post-hoc robustness analyses}
+\label{sec:posthoc_results}
+
+The following analyses were introduced only after exposure to the 2026 holdout and therefore do not alter the frozen primary result.
+
+\paragraph{Stronger simple economic benchmarks.}
+To compare XGBoost with simple rules that exploit recurring intraday structure, a weekday-aware naive benchmark and a trailing seven-day hourly mean profile were evaluated post hoc. The trailing-profile rule requires seven completed prior holdout days, so Table~\ref{tab:posthoc_benchmarks} uses the common 205-day sample from 8 January through 31 July 2026.
+
+\begin{table}[htbp]
+\centering
+\caption{Post-hoc simple-benchmark comparison on the common 205-day sample.}
+\label{tab:posthoc_benchmarks}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+Strategy & MAE & RMSE & Net P\&L & Oracle share \\
+\midrule
+Lag-24 & 29.06 & 46.84 & 18,495.13 & 87.8\% \\
+Weekday-aware naive & 29.89 & 47.77 & 18,372.81 & 87.2\% \\
+Trailing 7-day mean profile & 29.28 & 43.59 & 19,630.98 & 93.2\% \\
+XGBoost Tier-1 & 24.25 & 38.49 & 19,142.04 & 90.9\% \\
+XGBoost Full & \textbf{17.51} & \textbf{30.06} & \textbf{19,869.02} & \textbf{94.3\%} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+Full XGBoost remains the most accurate model by a wide margin on this common sample, but the economic comparison is considerably tighter. Its net P\&L exceeds the trailing-profile rule by only €238.04. Tier-1 trails the trailing profile by €488.94. This shows that much of the economic value can be captured by a simple rule that learns the recurring hourly price shape, even though that rule has substantially worse point-forecast MAE than Full XGBoost.
+
+\paragraph{Paired daily inference.}
+Table~\ref{tab:posthoc_bootstrap} reports seven-day moving-block bootstrap intervals for selected daily P\&L contrasts. These intervals are supplementary and were not part of the frozen success criterion.
+
+\begin{table}[htbp]
+\centering
+\caption{Post-hoc paired daily P\&L contrasts with 7-day moving-block bootstrap 95\% intervals.}
+\label{tab:posthoc_bootstrap}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+Contrast & Days & Total difference & 95\% interval & Wins & Losses \\
+\midrule
+S2--S1 & 212 & 1,437.60 & [752.08, 2,140.98] & 95 & 63 \\
+S3--S2 & 212 & -872.01 & [-1,459.21, -359.39] & 16 & 34 \\
+S4--S2 & 212 & -783.61 & [-1,267.64, -348.12] & 49 & 97 \\
+S5--S3 & 212 & -4,408.77 & [-6,189.90, -2,741.33] & 29 & 91 \\
+S2--Trailing 7-day & 205 & 238.04 & [-110.21, 573.81] & 84 & 57 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+The frozen S2--S1 contrast remains positive under this supplementary paired analysis. By contrast, the Full XGBoost advantage over the post-hoc trailing-profile rule is much smaller and its block-bootstrap interval includes zero. The monthly S2--S1 decomposition is also uneven: January, February and March contribute €340.52, €367.45 and €300.87 respectively; April--June contribute €433.70 in total; July is approximately flat at -€4.94.
+
+\paragraph{Holdout interval calibration.}
+Table~\ref{tab:posthoc_calibration} summarizes post-hoc calibration of the nominal central 80\% intervals.
+
+\begin{table}[htbp]
+\centering
+\caption{Post-hoc holdout calibration of the nominal central 80\% intervals.}
+\label{tab:posthoc_calibration}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+Information set & Coverage & Lower miss & Upper miss & Mean width & Winkler score \\
+\midrule
+Full & 77.1\% & 9.7\% & 13.2\% & 45.12 & 89.25 \\
+Tier-1 & 77.7\% & 11.3\% & 11.0\% & 71.72 & 135.31 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+Overall coverage is moderately below the nominal 80\% target for both information sets. Tier-1 achieves similar coverage only with intervals about 59\% wider than Full. Calibration is not stable over time: Full monthly coverage ranges from 69.7\% in March to 88.3\% in May, while Tier-1 ranges from 56.5\% in March to 92.2\% in May. Exploratory local-hour diagnostics also show lower Full coverage around several midday and evening hours, consistent with residual heteroskedasticity that is obscured by the pooled-hour residual construction.
 \subsection{Holdout summary}
 
 The first-look 2026 evidence supports the primary forecast-value result. Full XGBoost retains a large accuracy advantage, and the pre-specified economic contrast \(S2-S1\) is positive at the primary setting and in all nine sensitivity cells. Tier-1 has a higher economic point estimate than lag-24, but that non-pre-specified comparison is descriptive. The uncertainty-aware rule operates as an additional day-varying abstention threshold and trades aggregate profit for substantially greater selectivity and downside protection.
