@@ -115,7 +115,7 @@ These are results under the frozen research contract. They are **not claims abou
 
 After exposure to the frozen Jan--Jul 2026 holdout, supplementary diagnostics were added under `outputs/posthoc/robustness_v1/`. They include stronger simple economic baselines, 7-day moving-block bootstrap intervals, monthly S2-S1 decomposition and holdout uncertainty calibration. These analyses are explicitly post hoc and do not alter the original frozen sign-consistency rule.
 
-On the common 205-day sample required by the trailing seven-day hourly profile, Full XGBoost remains much more accurate (MAE 17.51 versus 29.28 EUR/MWh) but exceeds the trailing-profile strategy by only EUR 238.04 in net P&L. The post-hoc 7-day block-bootstrap interval for that economic difference spans zero. By contrast, the original frozen S2-S1 difference is EUR 1,437.60 and its supplementary 7-day block-bootstrap interval remains positive.
+Using late-December 2025 realized price profiles to initialize the first seven January forecasts, the trailing seven-day hourly profile can be evaluated on the full 212-day holdout. Full XGBoost remains much more accurate (MAE 17.51 versus 29.56 EUR/MWh) but exceeds the trailing-profile strategy by only EUR 279.73 in net P&L; the post-hoc 7-day block-bootstrap interval spans zero. Across an exploratory 3--28-day profile family, Full's margin ranges from about EUR 279.73 to EUR 492.44. By contrast, the original frozen S2-S1 difference is EUR 1,437.60 and its supplementary 7-day block-bootstrap interval remains positive.
 
 See [`REPLICATION.md`](REPLICATION.md) for the manuscript-to-artifact map and exact-reproduction boundary.
 
