@@ -73,6 +73,8 @@ A fixed 24-hour UTC lag is not always sufficient on a 25-hour autumn DST day to 
 
 Calendar features include cyclic sine and cosine representations of hour, day of week and month, a weekend indicator, weekend--hour interactions, and the post-15-minute-MTU regime indicator.
 
+Figures~\ref{fig:price_history}--\ref{fig:residual_load} summarize the corrected development sample. Figure~\ref{fig:price_history} shows the long-run price path, Figure~\ref{fig:price_distribution} shows the asymmetric distribution with negative observations and a pronounced upper tail, Figure~\ref{fig:seasonality} documents strong intraday and weekday structure, and Figure~\ref{fig:residual_load} illustrates the positive but nonlinear association between forecast residual load and price. These descriptive patterns motivate both the lag/calendar predictors and the inclusion of system fundamentals; they are not used as holdout evidence.
+
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{fig1_price_history.png}
