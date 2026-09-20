@@ -102,9 +102,9 @@ The Full uncertainty-aware strategy earns €19,130.01 compared with €20,002.0
 \Delta_{uncertainty}=-€872.01.
 \]
 
-S2 and S3 both abstain on two days; S2 trades while S3 abstains on 50 days; both trade on 160 days; and whenever both trade, they select the same charge-discharge pair. S3 never trades when S2 abstains.
+Consistent with the algebraic threshold identity in Section~\ref{sec:methods}, S2 and S3 both abstain on two days, S2 trades while S3 abstains on 50 days, and both trade on 160 days. Whenever both trade, the pair must be identical because the day-level threshold shifts every candidate pair score by the same amount; likewise, S3 cannot trade when S2 abstains. These are mechanical consequences of the frozen uncertainty construction rather than empirical discoveries.
 
-The uncertainty filter therefore acts almost entirely through abstention. It forgoes €952.46 of profitable opportunities and avoids €80.44 of losses, exactly reconciling to the -€872.01 total gap.
+The substantive empirical result is therefore the value of the additional abstention. The filter forgoes €952.46 of profitable opportunities and avoids €80.44 of losses, reconciling to the reported aggregate gap up to rounding.
 
 The reduction in aggregate profit is accompanied by substantial downside improvement. The hit rate rises from 91.9\% to 99.4\%, the worst day improves from -€17.55 to -€0.83, and maximum drawdown improves from approximately -€22.61 to -€0.83.
 
@@ -120,11 +120,11 @@ giving
 \]
 The Tier-1 contrast is negative in all nine sensitivity cells.
 
-However, Tier-1 still exceeds lag-24:
+The Tier-1 point estimate also exceeds lag-24:
 \[
 S4-S1=€653.99.
 \]
-The same pattern appears in forecast accuracy: Tier-1 materially improves on lag-24 but remains weaker than Full.
+This comparison was not one of the four pre-specified contrasts and is therefore reported descriptively rather than as a confirmatory economic result. In forecast accuracy, by contrast, Tier-1 materially improves on lag-24 while remaining weaker than Full.
 
 Applying the uncertainty filter to Tier-1 produces S5, which trades on only 117 days with a 99.1\% hit rate and earns €14,721.23. It forgoes €4,654.82 of profitable outcomes while avoiding only €157.64 of losses relative to S4.
 
@@ -169,4 +169,4 @@ S2's profits are not dominated by one extreme day: the top 1\%, 5\% and 10\% of 
 
 \subsection{Holdout summary}
 
-The first-look 2026 evidence supports the primary forecast-value result. Full XGBoost retains a large accuracy advantage, the economic contrast \(S2-S1\) is positive at the primary setting and in all nine pre-specified sensitivity cells, and Tier-1 retains a smaller but positive edge over lag-24. Uncertainty filtering again trades aggregate profit for substantially greater selectivity and downside protection.
+The first-look 2026 evidence supports the primary forecast-value result. Full XGBoost retains a large accuracy advantage, and the pre-specified economic contrast \(S2-S1\) is positive at the primary setting and in all nine sensitivity cells. Tier-1 has a higher economic point estimate than lag-24, but that non-pre-specified comparison is descriptive. The uncertainty-aware rule operates as an additional day-varying abstention threshold and trades aggregate profit for substantially greater selectivity and downside protection.
