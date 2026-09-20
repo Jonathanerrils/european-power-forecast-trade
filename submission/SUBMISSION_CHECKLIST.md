@@ -39,19 +39,19 @@
 - [x] Funding declaration present.
 - [x] Data/code availability section present.
 - [x] Generative-AI declaration updated to current Elsevier policy.
-- [ ] Final acknowledgements text or remove placeholder if none.
+- [x] Final acknowledgements text included.
 - [ ] Verify whether a graphical abstract is requested/desired at actual submission.
 - [ ] Confirm current submission-system metadata immediately before upload.
-- [ ] Confirm final author affiliation and corresponding-author details.
+- [x] Final author name, KNUST affiliation and corresponding-author details confirmed.
 
 ## Final document QA
-- [ ] Pull the latest manuscript branch into Overleaf/manual project.
-- [ ] Compile from scratch after all current GitHub edits.
-- [ ] Confirm bibliography resolves without undefined citations.
-- [ ] Confirm no missing figures, overfull tables or clipped appendix text.
-- [ ] Check every figure at normal PDF zoom for legibility.
-- [ ] Check page breaks and float placement.
-- [ ] Export final PDF and compare key numbers against frozen CSV/JSON artifacts.
+- [x] Latest manuscript changes reflected in Overleaf.
+- [x] Final manuscript compiled successfully in Overleaf.
+- [x] Bibliography resolves in the final compile.
+- [x] Final PDF visually checked for missing figures, table fit and appendix rendering.
+- [x] All nine figures checked for legibility.
+- [x] Page breaks and float placement reviewed in the final PDF.
+- [x] Final PDF exported and key reported results checked against preserved artifacts.
 - [ ] Freeze final submission commit/tag only after all checks pass.
 
 ## Submission discipline
