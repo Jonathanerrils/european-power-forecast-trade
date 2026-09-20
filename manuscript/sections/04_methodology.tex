@@ -5,6 +5,8 @@
 
 The analysis proceeds through four layers: point forecasting, forecast uncertainty, economic decision-making and tail-risk evaluation. Development choices are completed before the 2026 holdout is opened.
 
+\input{figures/fig5_workflow}
+
 The naive benchmarks are
 \begin{equation}
 \widehat P^{(24)}_t=P_{t-24}
@@ -197,6 +199,8 @@ Daily strategy loss is defined as
 L_{D,s}=-\Pi_{D,s}.
 \end{equation}
 Empirical historical VaR and Expected Shortfall are reported at 95\% and 99\%. ES is computed from the exact worst \(m=(1-c)N\) observation-equivalents, using fractional weight at the boundary when necessary. Estimates based on fewer than 20 effective tail observations are flagged as low precision.
+
+\input{figures/fig6_timeline}
 
 \subsection{Holdout updating and frozen protocol}
 
