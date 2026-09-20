@@ -9,6 +9,7 @@ Table~\ref{tab:dev_mae} summarizes MAE across the four chronological outer valid
 \centering
 \caption{Development-sample MAE by model and validation period (EUR/MWh).}
 \label{tab:dev_mae}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrrrr}
 \toprule
 Validation & Lag-24 & Lag-168 & EN Full & EN Tier-1 & XGB Full & XGB Tier-1 \\
@@ -19,6 +20,7 @@ Jan--Sep 2025 & 26.04 & 32.18 & 18.90 & 23.18 & \textbf{16.47} & 22.50 \\
 Oct--Dec 2025 & 25.76 & 34.71 & 20.00 & 24.44 & \textbf{15.64} & 23.13 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 Full XGBoost has the lowest MAE in every outer fold. Relative to lag-24, the MAE reduction is approximately 38.3\% in 2023, 41.2\% in 2024, 36.7\% in January--September 2025 and 39.3\% in the October--December regime-stress period. The post-cutover result is particularly relevant because it shows that the forecasting advantage does not disappear immediately after the 15-minute SDAC transition.
@@ -39,6 +41,7 @@ The delivery-day-safe residual-window comparison is reported in Table~\ref{tab:u
 \centering
 \caption{Development uncertainty-window selection.}
 \label{tab:uncertainty_windows}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{rrrr}
 \toprule
 Window (days) & Empirical coverage & Mean width & Interval score \\
@@ -50,6 +53,7 @@ Window (days) & Empirical coverage & Mean width & Interval score \\
 365 & \textbf{0.7978} & 49.43 & 84.43 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 The 365-day window is closest to the nominal 80\% coverage but produces materially wider intervals. Under the frozen selection rule, the 60-day window wins because it has the lowest common-row Winkler score. Its empirical coverage by fold is 80.1\%, 78.6\%, 77.8\% and 79.1\%, respectively, all within the three-percentage-point diagnostic tolerance around the nominal level.
@@ -62,6 +66,7 @@ At the primary economic specification, 1,081 common development delivery days ar
 \centering
 \caption{Development-sample strategy results at eta=0.85 and c=€10.}
 \label{tab:dev_strategy}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrrr}
 \toprule
 Strategy & Trading days & Net P\&L & Profitable days & Hit rate & Worst day \\
@@ -74,6 +79,7 @@ S4 & 1,046 & 58,179.08 & 83.7\% & 86.5\% & -56.82 \\
 S5 & 297 & 29,155.17 & 26.5\% & 96.6\% & -55.05 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 The primary forecast-value contrast is
@@ -110,6 +116,7 @@ The development ex-post oracle produces €72,955.08. Value-capture ratios are 7
 \centering
 \caption{Development empirical daily-loss VaR and Expected Shortfall.}
 \label{tab:dev_tailrisk}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrr}
 \toprule
 Strategy & VaR 95\% & ES 95\% & VaR 99\% & ES 99\% \\
@@ -121,6 +128,7 @@ S4 & 9.84 & 20.81 & 26.44 & 38.66 \\
 S5 & 0.00 & 3.06 & 0.00 & 15.32 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 The 99\% estimates rest on only about 10.8 effective tail observations and are therefore flagged as low precision.
