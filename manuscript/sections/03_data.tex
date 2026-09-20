@@ -15,6 +15,7 @@ Three data categories are retrieved from the ENTSO-E Transparency Platform:
 \centering
 \caption{ENTSO-E variables used in the study.}
 \label{tab:data_sources}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{llll}
 \toprule
 Component & Document type & Unit & Role \\
@@ -24,6 +25,7 @@ Day-ahead total load forecast & A65 & MW & Tier-1 fundamental \\
 Day-ahead wind/solar forecast & A69 & MW & Tier-2 renewable inputs \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 Raw XML responses are cached using request parameters, while ingestion metadata preserve retrieval timestamps, requested windows, data types and row counts. This makes the processed feature set traceable to the raw ENTSO-E responses used in the analysis.
@@ -103,6 +105,7 @@ Four chronological outer validation blocks are defined within development:
 \centering
 \caption{Chronological development splits.}
 \label{tab:splits}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lll}
 \toprule
 Fold & Training period & Validation period \\
@@ -113,6 +116,7 @@ Fold & Training period & Validation period \\
 Regime stress & 2019--Sep 2025 & Oct--Dec 2025 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 No shuffling is permitted. After development decisions are frozen, the final Full and Tier-1 models are independently refitted on all eligible observations through 31 December 2025.
