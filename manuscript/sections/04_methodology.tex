@@ -228,6 +228,18 @@ Empirical historical VaR and Expected Shortfall are reported at 95\% and 99\%. E
 \label{fig:timeline}
 \end{figure}
 
+\subsection{Post-hoc robustness analyses}
+\label{sec:posthoc_methods}
+
+After the January--July 2026 holdout had been exposed, additional diagnostics were introduced to probe the strength and interpretation of the frozen results. These analyses are explicitly supplementary and do not redefine the original confirmation rule.
+
+First, two stronger simple economic benchmarks were added. A weekday-aware naive forecast uses lag-24 on Tuesday--Friday and lag-168 on Saturday--Monday. A trailing seven-completed-day hourly mean profile forecasts each local delivery hour by the mean realized price at that same local hour over the preceding seven completed delivery days. Because this second rule requires a seven-day warm-up, comparisons involving it use a common 205-day sample from holdout day 8 onward.
+
+Second, paired daily P\&L differences are summarized using circular moving-block bootstrap intervals with seven-day blocks, 20,000 resamples and fixed seed 20260920. These intervals are post-hoc descriptive inference and are not part of the frozen success criterion.
+
+Third, holdout interval calibration is reported for Full and Tier-1 using empirical coverage of the nominal central 80\% interval, lower- and upper-tail miss rates, mean interval width and the same Winkler score used during development. Monthly and local-hour diagnostics are treated as exploratory because they were not pre-specified.
+
+All calculations are reproduced by \texttt{scripts/posthoc\_robustness\_v1.py}; derived outputs are stored under \texttt{outputs/posthoc/robustness\_v1/}.
 \subsection{Holdout updating and frozen protocol}
 
 At the start of 2026, uncertainty history consists of the development out-of-sample residuals, not in-sample residuals from the final refitted models. For each holdout day \(D\), the uncertainty snapshot is formed using eligible development residuals plus residuals from already revealed holdout days. The day-\(D\) residual is appended only after prices for \(D\) are revealed and can therefore affect \(D+1\) onward.
