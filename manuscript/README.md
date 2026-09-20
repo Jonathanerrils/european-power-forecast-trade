@@ -15,7 +15,7 @@ The current first-choice target is **Energy Economics**. The draft uses Elsevier
 3. Set the repository-root `main.tex` as the main file.
 4. The manuscript references EDA figures already stored in the repository.
 5. Author, KNUST affiliation, corresponding-author email and no-funding statement are already populated; acknowledgements remain to be added before submission.
-6. Adapt the AI-assistance declaration to the chosen journal's current policy.
+6. The AI-assistance declaration has been updated to Elsevier's current journal policy; recheck the policy immediately before submission.
 
 ## Scientific source of truth
 
@@ -37,3 +37,10 @@ Final model-fit commit:
 `54a7c2e77122134eca31a09798cc1614df1c634c`
 
 Do not alter a scientific result merely to improve the manuscript narrative.
+
+## Submission support
+
+- Repository replication map: `../REPLICATION.md`
+- Energy Economics Highlights: `../submission/HIGHLIGHTS.txt`
+- Draft cover letter: `../submission/COVER_LETTER.txt`
+- Final readiness checklist: `../submission/SUBMISSION_CHECKLIST.md`
