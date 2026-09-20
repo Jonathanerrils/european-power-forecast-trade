@@ -81,7 +81,7 @@ Tier-1 & 0.03 & 3 & 400 & 0.80 & 61,143 \\
 \end{adjustbox}
 \end{table}
 
-Model files, predictor lists and manifests were checksum-verified before holdout evaluation.
+Model files, predictor lists and manifests were checksum-verified before holdout evaluation. Both selected final models lie on at least one boundary of the frozen tuning grid: depth 3 is the minimum candidate for both models, while the Full model also selects the maximum tested learning rate of 0.10. These boundary selections are reported as a limitation of the finite search space rather than used to expand the grid after holdout exposure.
 
 \subsection{Delivery-day-safe empirical uncertainty}
 
@@ -122,7 +122,7 @@ Lower is better. The window with the lowest common-row score is selected mechani
 
 \subsection{Economic decision rule}
 
-The economic layer is a stylized single-cycle daily storage problem. For each delivery day, all pairs \((i,j)\) satisfying \(i<j\) are candidates. A normalized one-unit charge is made at \(i\), with round-trip efficiency \(\eta_{rt}\) applied to the discharge leg.
+The economic layer is a stylized single-cycle daily storage problem. For each delivery day, all pairs \((i,j)\) satisfying \(i<j\) are candidates. The charge quantity is normalized to 1 MWh in one hourly interval, with round-trip efficiency \(\eta_{rt}\) applied to the discharge leg. Because prices are measured in EUR/MWh, reported daily and cumulative P\&L therefore have units of euros per normalized 1-MWh daily opportunity. They are not returns on a fully specified battery asset or invested capital.
 
 Throughput degradation cost is
 \begin{equation}
@@ -153,7 +153,23 @@ For uncertainty-aware strategies, the conservative score is
 \begin{equation}
 Score_U(i,j)=\eta_{rt}L_j-U_i-C.
 \end{equation}
-This is a decision filter based on marginal bounds, not a jointly calibrated interval for the price spread.
+Because the residual offsets are delivery-day specific but common to all hours within day \(D\),
+\[
+L_{D,h}=\widehat P_{D,h}+r_D(0.10),\qquad
+U_{D,h}=\widehat P_{D,h}+r_D(0.90).
+\]
+Substitution gives
+\begin{align}
+Score_U(i,j)
+&=\eta_{rt}\widehat P_j-\widehat P_i-C
+   +\eta_{rt}r_D(0.10)-r_D(0.90)\\
+&=Score_P(i,j)-\tau_D,
+\end{align}
+where
+\begin{equation}
+\tau_D=r_D(0.90)-\eta_{rt}r_D(0.10).
+\end{equation}
+Thus \(\tau_D\) is constant across all candidate pairs within a delivery day. The uncertainty-aware rule therefore preserves the point strategy's ranking of intraday pairs exactly: whenever it trades, it selects the same maximizing pair as the corresponding point strategy; its only additional action is to abstain when the point strategy's best score does not exceed \(\tau_D\). Under the frozen pooled-residual construction, the uncertainty layer is therefore a day-varying abstention threshold. The marginal bounds remain useful as a conservative decision filter, but they are not a jointly calibrated interval for the price spread.
 
 The frozen strategies are:
 \begin{description}[leftmargin=1.2cm,style=nextline]
@@ -187,7 +203,7 @@ A complete sensitivity grid is frozen in advance:
 c\in\{5,10,15\}.
 \]
 
-The primary holdout criterion concerns only \(\Delta_{forecast}\). Full confirmation requires a positive value in the primary cell and all nine sensitivity cells; partial confirmation requires a positive primary cell but fewer than nine positive cells; failure occurs if the primary cell is non-positive.
+The primary holdout criterion concerns only \(\Delta_{forecast}\). Full confirmation requires a positive value in the primary cell and all nine sensitivity cells; partial confirmation requires a positive primary cell but fewer than nine positive cells; failure occurs if the primary cell is non-positive. These nine cells are mechanically related sensitivity scenarios, not independent replications: the degradation cost enters as a common within-day pair cost and therefore primarily changes net value and abstention, while efficiency can also affect pair ranking.
 
 An ex-post perfect-information oracle is
 \begin{equation}
