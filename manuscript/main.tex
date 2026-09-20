@@ -6,6 +6,7 @@
 \usepackage{tabularx}
 \usepackage{longtable}
 \usepackage{graphicx}
+\usepackage{adjustbox}
 \usepackage{siunitx}
 \usepackage{microtype}
 \usepackage{enumitem}
@@ -77,13 +78,30 @@ To be added before submission.
 \appendix
 \section{Frozen research provenance}
 \label{app:provenance}
-The pre-holdout protocol was frozen in the repository at commit
-\texttt{a2d1f9a79022ca1e2731d52803061825038c69f5}. The final Full and Tier-1 model fit was frozen at commit
-\texttt{54a7c2e77122134eca31a09798cc1614df1c634c}. The accepted corrected development lineage is identified by
-\texttt{xgboost\_v1\_a03fix}, \texttt{uncertainty\_selected\_v2\_dayorigin},
-\texttt{strategy\_report\_v2\_dayorigin} and \texttt{strategy\_tailrisk\_v2\_dayorigin}.
-The preserved holdout artifacts are \texttt{holdout\_v1},
-\texttt{holdout\_report\_v1}, \texttt{holdout\_sensitivity\_v1} and
-\texttt{holdout\_tailrisk\_v1}.
+
+\begingroup
+\small
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+\textbf{Pre-holdout protocol commit}\\
+\nolinkurl{a2d1f9a79022ca1e2731d52803061825038c69f5}
+
+\textbf{Final Full and Tier-1 model-fit commit}\\
+\nolinkurl{54a7c2e77122134eca31a09798cc1614df1c634c}
+
+\textbf{Accepted corrected development lineage}\\
+\nolinkurl{xgboost_v1_a03fix}\\
+\nolinkurl{uncertainty_selected_v2_dayorigin}\\
+\nolinkurl{strategy_report_v2_dayorigin}\\
+\nolinkurl{strategy_tailrisk_v2_dayorigin}
+
+\textbf{Preserved holdout artifacts}\\
+\nolinkurl{holdout_v1}\\
+\nolinkurl{holdout_report_v1}\\
+\nolinkurl{holdout_sensitivity_v1}\\
+\nolinkurl{holdout_tailrisk_v1}
+
+\endgroup
 
 \end{document}
