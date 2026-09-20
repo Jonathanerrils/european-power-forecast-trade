@@ -23,7 +23,12 @@ XGBoost Tier-1 & 24.36 & 38.41 & 15.77 & 5,087 \\
 \end{adjustbox}
 \end{table}
 
-\input{figures/fig7_holdout_accuracy}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/fig7_holdout_forecast_accuracy.png}
+\caption{Point-forecast accuracy in the frozen 2026 holdout (\(N=5{,}087\) common hourly observations). Full XGBoost has the lowest MAE and RMSE, while Tier-1 XGBoost remains more accurate than both naive benchmarks.}
+\label{fig:holdout_accuracy}
+\end{figure}
 
 Full XGBoost reduces MAE by approximately 40.3\% relative to lag-24 and 51.4\% relative to lag-168. Tier-1 XGBoost also improves upon lag-24, with an MAE approximately 16.9\% lower, but remains materially weaker than Full.
 
@@ -49,7 +54,12 @@ S5 & 117 & 14,721.23 & 54.7\% & 99.1\% & -5.98 \\
 \end{adjustbox}
 \end{table}
 
-\input{figures/fig8_cumulative_pnl}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/fig8_holdout_cumulative_pnl.png}
+\caption{Cumulative net P\&L over the 212-day frozen 2026 holdout. The curves are constructed directly from the preserved daily strategy results.}
+\label{fig:cumulative_pnl}
+\end{figure}
 
 The primary contrast is
 \[
@@ -76,7 +86,12 @@ Thus the Full XGBoost point strategy earns approximately 7.7\% more cumulative n
 \end{adjustbox}
 \end{table}
 
-\input{figures/fig9_sensitivity}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.88\linewidth]{figures/fig9_holdout_sensitivity_heatmap.png}
+\caption{Sensitivity of the holdout forecast-value contrast \(S2-S1\) across the pre-specified efficiency and degradation-cost grid. Every cell is positive; the outlined cell is the primary setting.}
+\label{fig:sensitivity_heatmap}
+\end{figure}
 
 The contrast is positive in all nine cells. Under the mechanical rule specified before holdout exposure, the primary forecast-value result therefore meets the criterion for \emph{confirmation}. The classification applies specifically to S2 over S1 under the frozen stylized contract; it does not imply confirmation of every secondary development finding.
 
