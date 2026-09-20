@@ -203,7 +203,7 @@ A complete sensitivity grid is frozen in advance:
 c\in\{5,10,15\}.
 \]
 
-The primary holdout criterion concerns only \(\Delta_{forecast}\). Full confirmation requires a positive value in the primary cell and all nine sensitivity cells; partial confirmation requires a positive primary cell but fewer than nine positive cells; failure occurs if the primary cell is non-positive. These nine cells are mechanically related sensitivity scenarios, not independent replications: the degradation cost enters as a common within-day pair cost and therefore primarily changes net value and abstention, while efficiency can also affect pair ranking.
+The primary holdout sign-consistency criterion concerns only \(\Delta_{forecast}\). The frozen rule classifies the result as full sign consistency when the primary cell and all nine sensitivity cells are positive, partial sign consistency when the primary cell is positive but fewer than nine cells are positive, and failure when the primary cell is non-positive. These nine cells are mechanically related sensitivity scenarios, not independent replications: the degradation cost enters as a common within-day pair cost and therefore primarily changes net value and abstention, while efficiency can also affect pair ranking.
 
 An ex-post perfect-information oracle is
 \begin{equation}
@@ -231,7 +231,7 @@ Empirical historical VaR and Expected Shortfall are reported at 95\% and 99\%. E
 \subsection{Post-hoc robustness analyses}
 \label{sec:posthoc_methods}
 
-After the January--July 2026 holdout had been exposed, additional diagnostics were introduced to probe the strength and interpretation of the frozen results. These analyses are explicitly supplementary and do not redefine the original confirmation rule.
+After the January--July 2026 holdout had been exposed, additional diagnostics were introduced to probe the strength and interpretation of the frozen results. These analyses are explicitly supplementary and do not redefine the original frozen sign-consistency rule.
 
 First, two stronger simple economic benchmarks were added. A weekday-aware naive forecast uses lag-24 on Tuesday--Friday and lag-168 on Saturday--Monday. A trailing seven-completed-day hourly mean profile forecasts each local delivery hour by the mean realized price at that same local hour over the preceding seven completed delivery days. Because this second rule requires a seven-day warm-up, comparisons involving it use a common 205-day sample from holdout day 8 onward.
 
@@ -244,4 +244,4 @@ All calculations are reproduced by \texttt{scripts/posthoc\_robustness\_v1.py}; 
 
 Figure~\ref{fig:timeline} summarizes the chronological separation between development, protocol freeze and the first-look holdout. At the start of 2026, uncertainty history consists of the development out-of-sample residuals, not in-sample residuals from the final refitted models. For each holdout day \(D\), the uncertainty snapshot is formed using eligible development residuals plus residuals from already revealed holdout days. The day-\(D\) residual is appended only after prices for \(D\) are revealed and can therefore affect \(D+1\) onward.
 
-The holdout boundary, final model-refit rule, uncertainty specification, strategy definitions, primary parameter cell, nine-cell grid, common-day rule, VaR/ES method and mechanical confirmation rule were all frozen before the first 2026 outcome metric was inspected. The complete holdout orchestration was rehearsed on non-holdout data before exposure. If a bug had been discovered after exposure, the protocol required preservation of the original result and explicit labeling of any corrective analysis rather than silent replacement.
+The holdout boundary, final model-refit rule, uncertainty specification, strategy definitions, primary parameter cell, nine-cell grid, common-day rule, VaR/ES method and mechanical sign-consistency rule were all frozen before the first 2026 outcome metric was inspected. The complete holdout orchestration was rehearsed on non-holdout data before exposure. If a bug had been discovered after exposure, the protocol required preservation of the original result and explicit labeling of any corrective analysis rather than silent replacement.
