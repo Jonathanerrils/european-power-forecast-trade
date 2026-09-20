@@ -25,7 +25,7 @@ Oct--Dec 2025 & 25.76 & 34.71 & 20.00 & 24.44 & \textbf{15.64} & 23.13 \\
 
 Full XGBoost has the lowest MAE in every outer fold. Relative to lag-24, the MAE reduction is approximately 38.3\% in 2023, 41.2\% in 2024, 36.7\% in January--September 2025 and 39.3\% in the October--December regime-stress period. The post-cutover result is particularly relevant because it shows that the forecasting advantage does not disappear immediately after the 15-minute SDAC transition.
 
-Tier-1 XGBoost also improves on lag-24 in every fold, but its error remains materially higher than Full XGBoost. This gap establishes that the renewable-related Tier-2 predictors carry substantial predictive information while simultaneously making their unresolved point-in-time status consequential.
+Tier-1 XGBoost also improves on lag-24 in every fold, but its error remains materially higher than Full XGBoost. Relative to Tier-1 ElasticNet, the row-weighted Tier-1 XGBoost MAE improves only modestly, from approximately €23.70/MWh to €23.01/MWh (about 2.9\%). Thus much of the Full-versus-Tier-1 gap is associated with the information set rather than a large nonlinear-model advantage within Tier-1. This gap establishes that the renewable-related Tier-2 predictors carry substantial predictive information while simultaneously making their unresolved point-in-time status consequential.
 
 The row-weighted Full ElasticNet MAE is €19.898/MWh, while Full XGBoost attains €16.470/MWh. The relative reduction,
 \[
@@ -56,7 +56,7 @@ Window (days) & Empirical coverage & Mean width & Interval score \\
 \end{adjustbox}
 \end{table}
 
-The 365-day window is closest to the nominal 80\% coverage but produces materially wider intervals. Under the frozen selection rule, the 60-day window wins because it has the lowest common-row Winkler score. Its empirical coverage by fold is 80.1\%, 78.6\%, 77.8\% and 79.1\%, respectively, all within the three-percentage-point diagnostic tolerance around the nominal level.
+The 365-day window is closest to the nominal 80\% coverage but produces materially wider intervals. Under the frozen selection rule, the 60-day window wins because it has the lowest common-row Winkler score. The selected 60-day window is also the shortest candidate in the tested grid, so its optimum lies on the search boundary and shorter windows were not evaluated. Table~\ref{tab:uncertainty_windows} uses the common 24,115-row intersection required for fair comparison across all candidate windows, giving pooled coverage 78.25\%. The subsequent selected-window calibration uses every row available to the 60-day method; this adds earlier eligible observations in fold 1 and yields fold coverages of 80.1\%, 78.6\%, 77.8\% and 79.1\%, respectively. The difference therefore reflects row-set scope, not conflicting calculations.
 
 \subsection{Development economic evidence}
 
