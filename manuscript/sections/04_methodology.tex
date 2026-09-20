@@ -3,7 +3,7 @@
 
 \subsection{Empirical design and forecast metrics}
 
-The analysis proceeds through four layers: point forecasting, forecast uncertainty, economic decision-making and tail-risk evaluation. Development choices are completed before the 2026 holdout is opened.
+The analysis proceeds through four layers: point forecasting, forecast uncertainty, economic decision-making and tail-risk evaluation. Figure~\ref{fig:workflow} summarizes this forecast-to-trade sequence. Development choices are completed before the 2026 holdout is opened.
 
 \begin{figure}[htbp]
 \centering
@@ -63,7 +63,7 @@ The development promotion rule required Full XGBoost to improve on the frozen Fu
 
 Once the development procedure was complete, Full and Tier-1 XGBoost were refitted independently on all development data. Each information set reran the same frozen 36-configuration search; hyperparameters were not transferred from one information set to the other.
 
-The selected final configurations were:
+The selected final configurations are reported in Table~\ref{tab:final_hyperparams}:
 
 \begin{table}[htbp]
 \centering
@@ -242,6 +242,6 @@ Third, holdout interval calibration is reported for Full and Tier-1 using empiri
 All calculations are reproduced by \texttt{scripts/posthoc\_robustness\_v1.py}; derived outputs are stored under \texttt{outputs/posthoc/robustness\_v1/}.
 \subsection{Holdout updating and frozen protocol}
 
-At the start of 2026, uncertainty history consists of the development out-of-sample residuals, not in-sample residuals from the final refitted models. For each holdout day \(D\), the uncertainty snapshot is formed using eligible development residuals plus residuals from already revealed holdout days. The day-\(D\) residual is appended only after prices for \(D\) are revealed and can therefore affect \(D+1\) onward.
+Figure~\ref{fig:timeline} summarizes the chronological separation between development, protocol freeze and the first-look holdout. At the start of 2026, uncertainty history consists of the development out-of-sample residuals, not in-sample residuals from the final refitted models. For each holdout day \(D\), the uncertainty snapshot is formed using eligible development residuals plus residuals from already revealed holdout days. The day-\(D\) residual is appended only after prices for \(D\) are revealed and can therefore affect \(D+1\) onward.
 
 The holdout boundary, final model-refit rule, uncertainty specification, strategy definitions, primary parameter cell, nine-cell grid, common-day rule, VaR/ES method and mechanical confirmation rule were all frozen before the first 2026 outcome metric was inspected. The complete holdout orchestration was rehearsed on non-holdout data before exposure. If a bug had been discovered after exposure, the protocol required preservation of the original result and explicit labeling of any corrective analysis rather than silent replacement.
