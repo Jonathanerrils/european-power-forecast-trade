@@ -23,6 +23,8 @@ XGBoost Tier-1 & 24.36 & 38.41 & 15.77 & 5,087 \\
 \end{adjustbox}
 \end{table}
 
+\input{figures/fig7_holdout_accuracy}
+
 Full XGBoost reduces MAE by approximately 40.3\% relative to lag-24 and 51.4\% relative to lag-168. Tier-1 XGBoost also improves upon lag-24, with an MAE approximately 16.9\% lower, but remains materially weaker than Full.
 
 \subsection{Primary economic results}
@@ -46,6 +48,8 @@ S5 & 117 & 14,721.23 & 54.7\% & 99.1\% & -5.98 \\
 \end{tabular}
 \end{adjustbox}
 \end{table}
+
+\input{figures/fig8_cumulative_pnl}
 
 The primary contrast is
 \[
@@ -71,6 +75,8 @@ Thus the Full XGBoost point strategy earns approximately 7.7\% more cumulative n
 \end{tabular}
 \end{adjustbox}
 \end{table}
+
+\input{figures/fig9_sensitivity}
 
 The contrast is positive in all nine cells. Under the mechanical rule specified before holdout exposure, the primary forecast-value result therefore meets the criterion for \emph{confirmation}. The classification applies specifically to S2 over S1 under the frozen stylized contract; it does not imply confirmation of every secondary development finding.
 
