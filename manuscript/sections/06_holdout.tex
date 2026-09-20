@@ -9,6 +9,7 @@ The frozen holdout covers 212 delivery days from 1 January through 31 July 2026.
 \centering
 \caption{Point-forecast performance in the frozen 2026 holdout.}
 \label{tab:holdout_forecasts}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrr}
 \toprule
 Model & MAE & RMSE & Median AE & \(N\) \\
@@ -19,6 +20,7 @@ XGBoost Full & \textbf{17.51} & \textbf{29.87} & \textbf{11.99} & 5,087 \\
 XGBoost Tier-1 & 24.36 & 38.41 & 15.77 & 5,087 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 Full XGBoost reduces MAE by approximately 40.3\% relative to lag-24 and 51.4\% relative to lag-168. Tier-1 XGBoost also improves upon lag-24, with an MAE approximately 16.9\% lower, but remains materially weaker than Full.
@@ -29,6 +31,7 @@ Full XGBoost reduces MAE by approximately 40.3\% relative to lag-24 and 51.4\% r
 \centering
 \caption{Frozen holdout strategy results at eta=0.85 and c=€10.}
 \label{tab:holdout_strategy}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrrr}
 \toprule
 Strategy & Trading days & Net P\&L & Profitable days & Hit rate & Worst day \\
@@ -41,6 +44,7 @@ S4 & 205 & 19,218.41 & 86.8\% & 89.8\% & -31.14 \\
 S5 & 117 & 14,721.23 & 54.7\% & 99.1\% & -5.98 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 The primary contrast is
@@ -55,6 +59,7 @@ Thus the Full XGBoost point strategy earns approximately 7.7\% more cumulative n
 \centering
 \caption{Frozen holdout \(S2-S1\) sensitivity grid (EUR).}
 \label{tab:holdout_grid}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{rrrr}
 \toprule
 \(\eta_{rt}\) & \(c=5\) & \(c=10\) & \(c=15\) \\
@@ -64,6 +69,7 @@ Thus the Full XGBoost point strategy earns approximately 7.7\% more cumulative n
 0.92 & 1,439.21 & 1,432.42 & 1,449.81 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 The contrast is positive in all nine cells. Under the mechanical rule specified before holdout exposure, the primary forecast-value result therefore meets the criterion for \emph{confirmation}. The classification applies specifically to S2 over S1 under the frozen stylized contract; it does not imply confirmation of every secondary development finding.
@@ -113,6 +119,7 @@ S2 therefore captures 94.2\% of the value available to the simplified perfect-hi
 \centering
 \caption{Frozen holdout empirical daily-loss VaR and Expected Shortfall.}
 \label{tab:holdout_tailrisk}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrr}
 \toprule
 Strategy & VaR 95\% & ES 95\% & VaR 99\% & ES 99\% \\
@@ -124,6 +131,7 @@ S4 & 5.09 & 13.02 & 20.60 & 26.82 \\
 S5 & 0.00 & 0.56 & 0.00 & 2.82 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 The holdout sample is too small for precise tail estimation. The 95\% tail contains only 10.6 effective observations and the 99\% tail 2.12. All holdout VaR and ES estimates are therefore flagged as low precision and used descriptively only.
