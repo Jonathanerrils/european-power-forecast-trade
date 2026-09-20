@@ -5,7 +5,12 @@
 
 The analysis proceeds through four layers: point forecasting, forecast uncertainty, economic decision-making and tail-risk evaluation. Development choices are completed before the 2026 holdout is opened.
 
-\input{figures/fig5_workflow}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/fig5_forecast_to_trade_workflow.png}
+\caption{Forecast-to-trade research workflow. Public ENTSO-E data are reconstructed and aligned into Full and Tier-1 information sets, evaluated chronologically during development, passed through the selected uncertainty and economic decision layers, and then assessed on the frozen 2026 holdout.}
+\label{fig:workflow}
+\end{figure}
 
 The naive benchmarks are
 \begin{equation}
@@ -200,7 +205,12 @@ L_{D,s}=-\Pi_{D,s}.
 \end{equation}
 Empirical historical VaR and Expected Shortfall are reported at 95\% and 99\%. ES is computed from the exact worst \(m=(1-c)N\) observation-equivalents, using fractional weight at the boundary when necessary. Estimates based on fewer than 20 effective tail observations are flagged as low precision.
 
-\input{figures/fig6_timeline}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/fig6_chronological_evaluation_design.png}
+\caption{Chronological development and holdout design. Model and uncertainty choices are made using 2019--2025 only. The protocol is frozen before the January--July 2026 first-look holdout is evaluated.}
+\label{fig:timeline}
+\end{figure}
 
 \subsection{Holdout updating and frozen protocol}
 
