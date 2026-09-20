@@ -70,54 +70,56 @@ save(fig, "fig5_forecast_to_trade_workflow.png")
 
 
 # Figure 6: chronological design
-fig, ax = plt.subplots(figsize=(11.8, 5.7))
-ax.set_xlim(2018.7, 2026.82)
-ax.set_ylim(0.35, 5.85)
+fig, ax = plt.subplots(figsize=(12.4, 6.2))
+ax.set_xlim(2018.7, 2027.05)
+ax.set_ylim(0.25, 5.95)
 rows = [
     ("Fold 1", 2019.00, 2023.00, 2023.00, 2024.00),
     ("Fold 2", 2019.00, 2024.00, 2024.00, 2025.00),
     ("Fold 3", 2019.00, 2025.00, 2025.00, 2025.75),
     ("Regime stress", 2019.00, 2025.75, 2025.75, 2026.00),
 ]
-ys = [4.65, 3.65, 2.65, 1.65]
-h = 0.44
+ys = [4.70, 3.70, 2.70, 1.70]
+h = 0.46
 for (label, tr0, tr1, va0, va1), y in zip(rows, ys):
     ax.add_patch(Rectangle((tr0, y), tr1-tr0, h,
-                           fill=False, hatch="///", linewidth=1.0))
+                           fill=False, hatch="///", linewidth=1.1))
     ax.add_patch(Rectangle((va0, y), va1-va0, h,
-                           fill=False, hatch="xx", linewidth=1.0))
-    ax.text(2018.94, y+h/2, label, ha="right", va="center", fontsize=9)
+                           fill=False, hatch="xx", linewidth=1.1))
+    ax.text(2018.93, y+h/2, label, ha="right", va="center", fontsize=10)
 
-ax.axvline(2026.0, linestyle="--", linewidth=1.4)
-ax.text(2026.0, 5.36, "Protocol freeze\nand final refit",
-        ha="center", va="bottom", fontsize=8.5)
+# Freeze boundary.
+ax.axvline(2026.0, linestyle="--", linewidth=1.5)
+ax.text(2026.0, 5.48, "Protocol freeze\nand final refit",
+        ha="center", va="bottom", fontsize=9.5)
 
-holdout_start, holdout_end, hold_y = 2026.00, 2026.58, 0.83
+# Actual holdout interval remains to scale, but the explanatory label is moved
+# outside the narrow bar for legibility in a journal-width figure.
+holdout_start, holdout_end, hold_y = 2026.00, 2026.58, 0.82
 ax.add_patch(Rectangle((holdout_start, hold_y), holdout_end-holdout_start, h,
-                       fill=False, hatch="..", linewidth=1.2))
-ax.text((holdout_start+holdout_end)/2, hold_y+h/2, "Holdout",
-        ha="center", va="center", fontsize=8.5)
-ax.annotate("1 Jan–31 Jul 2026",
-            xy=((holdout_start+holdout_end)/2, hold_y+h),
-            xytext=(2026.34, 1.62),
-            ha="center", va="bottom", fontsize=8.5,
-            arrowprops=dict(arrowstyle="-", linewidth=0.8))
+                       fill=False, hatch="..", linewidth=1.3))
+ax.annotate("Frozen first-look holdout\n1 Jan–31 Jul 2026",
+            xy=(holdout_end, hold_y+h/2),
+            xytext=(2026.76, 1.62),
+            ha="center", va="center", fontsize=9.5,
+            bbox=dict(boxstyle="round,pad=0.25", fill=False, linewidth=0.8),
+            arrowprops=dict(arrowstyle="-", linewidth=0.9))
 
-ax.text(2022.45, 0.47,
+ax.text(2022.45, 0.40,
         "All model, uncertainty and economic-rule choices use 2019–2025 only.",
-        ha="center", va="center", fontsize=8.8)
+        ha="center", va="center", fontsize=9.5)
 legend_handles = [
     Patch(fill=False, hatch="///", label="Training"),
     Patch(fill=False, hatch="xx", label="Validation / stress"),
     Patch(fill=False, hatch="..", label="Frozen holdout"),
 ]
 ax.legend(handles=legend_handles, loc="upper left",
-          bbox_to_anchor=(0.02, 0.99), ncol=3, frameon=False, fontsize=8.5)
+          bbox_to_anchor=(0.02, 0.99), ncol=3, frameon=False, fontsize=9)
 ax.set_xticks(range(2019, 2027))
 ax.set_yticks([])
-ax.set_xlabel("Delivery year")
+ax.set_xlabel("Delivery year", fontsize=10)
 ax.set_title("Chronological development and frozen holdout design",
-             fontsize=11.5, pad=10)
+             fontsize=12.5, pad=12)
 for spine in ["left", "right", "top"]:
     ax.spines[spine].set_visible(False)
 save(fig, "fig6_chronological_evaluation_design.png")
