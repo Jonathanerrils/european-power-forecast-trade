@@ -1,0 +1,107 @@
+\documentclass[preprint,12pt,authoryear]{elsarticle}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{siunitx}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue
+}
+
+\graphicspath{{../outputs/eda/delu_features/development/development_a03fix_v1/figures/}}
+
+\journal{Energy Economics}
+
+\newcommand{\EUR}[1]{€#1}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Forecast-to-Trade under Information Constraints: Frozen Out-of-Sample Evidence from the Germany--Luxembourg Day-Ahead Electricity Market}
+
+\author[knust]{Jonathan Anthonio Nii Pedro Nelson\corref{cor1}}
+\ead{jonathannelson707@gmail.com}
+\cortext[cor1]{Corresponding author.}
+\address[knust]{Kwame Nkrumah University of Science and Technology (KNUST), Kumasi, Ghana}
+
+\begin{abstract}
+Electricity-price forecasts are commonly judged by statistical errors even though their operational value depends on the decisions they support. This study evaluates whether a forecasting advantage survives point-in-time information constraints and translates into economic value under a frozen out-of-sample protocol for the Germany--Luxembourg day-ahead market. Public ENTSO-E data from 2019--2025 are used for development, while January--July 2026 is reserved for a first-look holdout. The information set is split into a Full specification and a Tier-1 robustness specification that excludes wind- and solar-derived variables whose exact historical availability at the simulated 11:45 D-1 decision time cannot be verified. XGBoost is selected during development against naive and ElasticNet benchmarks, and uncertainty is estimated from delivery-day-safe empirical residual quantiles. Forecasts are then mapped into a pre-specified single-cycle storage decision rule with a frozen efficiency--cost sensitivity grid. On 5,087 holdout hours, Full XGBoost attains an MAE of \EUR{17.51}/MWh versus \EUR{29.33}/MWh for lag-24. Under the primary economic assumptions, the Full point strategy earns \EUR{20,002.02} compared with \EUR{18,564.42} for lag-24, and the incremental value remains positive in all nine pre-specified sensitivity cells. A post-hoc trailing seven-day hourly profile narrows the economic comparison substantially: on 205 common days, Full exceeds it by only \EUR{238.04}, with a 7-day block-bootstrap interval spanning zero. The uncertainty-aware Full strategy implements a day-varying abstention threshold; it sacrifices \EUR{872.01} of aggregate P\&L but raises the trade hit rate from 91.9\% to 99.4\% and improves the worst day from -\EUR{17.55} to -\EUR{0.83}. The contribution is therefore methodological and evidential rather than algorithmic: forecast value is assessed under explicit information-timing boundaries, delivery-day-safe uncertainty, frozen pre-exposure rules, economic robustness and tail-risk diagnostics.
+\end{abstract}
+
+\begin{keyword}
+electricity price forecasting \sep Germany--Luxembourg \sep XGBoost \sep battery arbitrage \sep forecast uncertainty \sep economic value \sep out-of-sample evaluation
+\end{keyword}
+
+\end{frontmatter}
+
+\input{sections/01_introduction}
+\input{sections/02_literature}
+\input{sections/03_data}
+\input{sections/04_methodology}
+\input{sections/05_development}
+\input{sections/06_holdout}
+\input{sections/07_discussion}
+\input{sections/08_conclusion}
+
+\section*{Data and code availability}
+The complete research pipeline, frozen protocols, model artifacts, development outputs and 2026 holdout outputs are available at \url{https://github.com/Jonathanerrils/european-power-forecast-trade}. The repository preserves superseded development artifacts where methodological corrections occurred so that the research audit trail remains visible. ENTSO-E market data are subject to the source platform's terms of use.
+
+\section*{Declaration of competing interest}
+The author declares no competing interests.
+
+\section*{Funding}
+This research received no external funding.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
+During the preparation of this work, the author used ChatGPT (OpenAI) to assist with language editing, manuscript organization, LaTeX preparation and review of computational documentation. After using this tool, the author reviewed and edited the content as needed, independently verified the reported numerical results against the preserved research artifacts, and takes full responsibility for the content of the publication.
+
+\section*{Acknowledgements}
+The author gratefully acknowledges his Lord and personal Saviour, Jesus Christ, for His grace and guidance throughout this work, as well as the colleagues and researchers whose discussions, comments and suggestions contributed to the development and refinement of this study.
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references}
+
+\appendix
+\section{Frozen research provenance}
+\label{app:provenance}
+
+\begingroup
+\small
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+\textbf{Pre-holdout protocol commit}\\
+\nolinkurl{a2d1f9a79022ca1e2731d52803061825038c69f5}
+
+\textbf{Final Full and Tier-1 model-fit commit}\\
+\nolinkurl{54a7c2e77122134eca31a09798cc1614df1c634c}
+
+\textbf{Accepted corrected development lineage}\\
+\nolinkurl{xgboost_v1_a03fix}\\
+\nolinkurl{uncertainty_selected_v2_dayorigin}\\
+\nolinkurl{strategy_report_v2_dayorigin}\\
+\nolinkurl{strategy_tailrisk_v2_dayorigin}
+
+\textbf{Preserved holdout artifacts}\\
+\nolinkurl{holdout_v1}\\
+\nolinkurl{holdout_report_v1}\\
+\nolinkurl{holdout_sensitivity_v1}\\
+\nolinkurl{holdout_tailrisk_v1}
+
+\endgroup
+
+\end{document}

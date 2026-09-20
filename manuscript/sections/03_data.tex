@@ -1,0 +1,140 @@
+\section{Market setting, data and information set}
+\label{sec:data}
+
+\subsection{Germany--Luxembourg day-ahead market}
+
+The empirical application focuses on the Germany--Luxembourg (DE-LU) day-ahead bidding zone. The sample begins on 1 January 2019, after the German--Austrian bidding-zone split, and all market logic is defined by Europe/Berlin delivery dates. UTC is used internally for storage and joins.
+
+The simulated analyst forms the complete delivery-day forecast at 11:45 Europe/Berlin on D-1. This is before the regular SDAC order-book gate closure at 12:00 \citep{epex2025}. From delivery day 1 October 2025, SDAC moved from hourly to 15-minute market time units \citep{entsoe2025}. The forecasting and economic system remains hourly throughout: pre-cutover hourly prices enter directly, while post-cutover quarter-hourly prices are averaged within each hour. A regime indicator marks observations after the transition.
+
+\subsection{ENTSO-E data}
+
+Three data categories are retrieved from the ENTSO-E Transparency Platform and summarized in Table~\ref{tab:data_sources}:
+
+\begin{table}[htbp]
+\centering
+\caption{ENTSO-E variables used in the study.}
+\label{tab:data_sources}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{llll}
+\toprule
+Component & Document type & Unit & Role \\
+\midrule
+Day-ahead price & A44 & EUR/MWh & Target and lagged prices \\
+Day-ahead total load forecast & A65 & MW & Tier-1 fundamental \\
+Day-ahead wind/solar forecast & A69 & MW & Tier-2 renewable inputs \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+Raw XML responses are cached using request parameters, while ingestion metadata preserve retrieval timestamps, requested windows, data types and row counts. This makes the processed feature set traceable to the raw ENTSO-E responses used in the analysis.
+
+The complete processed feature file contains 66,455 hourly observations. The 2019--2025 development period contains 61,368 rows, while the 2026 holdout contributes 5,087 common point-evaluation rows across 212 delivery days.
+
+\subsection{Price reconstruction and market-product selection}
+
+A44 retrievals require explicit market-product selection. The historical ENTSO-E response contains parallel products that can share timestamps but differ in resolution. The production series retains the hourly product before the 15-minute SDAC transition and the 15-minute product thereafter.
+
+A second ambiguity arises from \texttt{classificationSequence}. The final production series retains sequence 1. This choice was externally audited against SMARD: among 8,833 corrected-data intervals in which sequences 1 and 2 differed materially, the SMARD price matched sequence 1 in every case and sequence 2 in none. The audit therefore supports sequence 1 as the continuing reference series used in this study.
+
+The XML parser also reconstructs ENTSO-E \texttt{curveType=A03} correctly. Under A03, only positions where the value changes need to be reported explicitly; intervening values inherit the previous block value. An earlier parser version treated such positions as missing. The corrected parser reconstructs the complete period before aggregation, and all results in this paper use the corrected \texttt{a03fix} lineage.
+
+\subsection{Time normalization and daylight-saving time}
+
+All raw timestamps are converted to timezone-aware UTC. Local delivery dates, hours, days of week and months are then derived using Europe/Berlin conversion. Market-design boundaries are defined by local delivery day rather than UTC midnight. This is necessary because the delivery day 1 October 2025 begins at 22:00 UTC on 30 September 2025 while summer time is in force.
+
+Load, wind and solar forecasts are reported at quarter-hourly resolution throughout the sample and are therefore averaged to hourly MW values over the full history. Price aggregation is conditional on the market-design cutover because the primary day-ahead price product itself changes resolution at that date.
+
+The three data sources are outer-joined by UTC timestamp so that a missing fundamental remains visible rather than causing the price row to disappear.
+
+\subsection{Fundamental and historical-price features}
+
+Aggregate forecast renewable generation is
+\begin{equation}
+\widehat R_t=
+\widehat W_t^{on}+\widehat W_t^{off}+\widehat S_t,
+\end{equation}
+residual load is
+\begin{equation}
+\widehat{RL}_t=\widehat L_t-\widehat R_t,
+\end{equation}
+and renewable share is
+\begin{equation}
+\widehat{RS}_t=\frac{\widehat R_t}{\widehat L_t},
+\end{equation}
+for positive load forecasts.
+
+Missing wind components are not treated as zero. Both onshore and offshore wind must be present before aggregate wind is formed. Solar missingness observed during development is concentrated in non-generating nighttime intervals and is treated as zero only for construction of the aggregate renewable variables.
+
+Historical price state is represented by 24-, 48- and 168-hour lags and rolling mean and volatility features over 24-hour and 168-hour windows. The hourly grid is regularized before lagging so that a row displacement remains an actual time displacement even when the raw series contains gaps.
+
+A fixed 24-hour UTC lag is not always sufficient on a 25-hour autumn DST day to guarantee that the source value belongs to an earlier local calendar date. The pipeline therefore invalidates any lagged observation that cannot be proven to cross the local delivery-date boundary. Rolling statistics inherit the same restriction.
+
+Calendar features include cyclic sine and cosine representations of hour, day of week and month, a weekend indicator, weekend--hour interactions, and the post-15-minute-MTU regime indicator.
+
+Figures~\ref{fig:price_history}--\ref{fig:residual_load} summarize the corrected development sample. Figure~\ref{fig:price_history} shows the long-run price path, Figure~\ref{fig:price_distribution} shows the asymmetric distribution with negative observations and a pronounced upper tail, Figure~\ref{fig:seasonality} documents strong intraday and weekday structure, and Figure~\ref{fig:residual_load} illustrates the positive but nonlinear association between forecast residual load and price. These descriptive patterns motivate both the lag/calendar predictors and the inclusion of system fundamentals; they are not used as holdout evidence.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{fig1_price_history.png}
+\caption{DE-LU day-ahead hourly price history in the development sample.}
+\label{fig:price_history}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\linewidth]{fig2_price_distribution.png}
+\caption{Distribution of DE-LU day-ahead hourly prices in the corrected development sample. The distribution includes negative prices and a pronounced upper tail.}
+\label{fig:price_distribution}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.90\linewidth]{fig3_seasonality_hour_weekday.png}
+\caption{Intraday and weekly seasonal structure of DE-LU day-ahead prices in the corrected development sample.}
+\label{fig:seasonality}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{fig4_residual_load_vs_price.png}
+\caption{Development-sample relationship between forecast residual load and day-ahead price.}
+\label{fig:residual_load}
+\end{figure}
+
+\subsection{Point-in-time information tiers}
+
+The central information-set distinction follows the simulated 11:45 D-1 forecast origin. Regulation (EU) No 543/2013 requires day-ahead total load forecasts no later than two hours before the relevant day-ahead gate closure \citep{eureg543}. This regulatory deadline is compatible with the 11:45 cutoff, although exact historical revision vintages remain unreconstructed.
+
+The same regulation requires day-ahead wind and solar generation forecasts no later than 18:00 Brussels time on D-1, with subsequent intraday updates \citep{eureg543}. ENTSO-E's Transparency Platform FAQ identifies process type A01 as the day-ahead wind/solar forecast and explains that different forecast versions are submitted as distinct documents \citep{entsoefaq2024}. The A01 label therefore identifies forecast type but does not, by itself, establish the exact publication time or version available at 11:45. Because the historical interface used here does not reconstruct the complete document-version history, strict point-in-time admissibility of the stored renewable forecast at the simulated cutoff cannot be proven.
+
+Accordingly, the \emph{Full} information set contains load plus aggregate renewables, residual load and renewable share, while the \emph{Tier-1} information set removes the three renewable-derived predictors. Tier-2 denotes variables whose exact 11:45 historical vintage is unresolved. It does not mean that leakage has been proven. The Full specification should therefore be interpreted as an information-rich benchmark whose strict real-time admissibility at 11:45 is not established, while Tier-1 provides the more conservative point-in-time robustness specification.
+
+The Full predictor vector contains 21 variables and Tier-1 contains 18. The Tier-1 comparison therefore asks how much predictive and economic performance survives when the unresolved renewable-vintage information is removed.
+
+\subsection{Development and holdout separation}
+
+Four chronological outer validation blocks are defined within development, as shown in Table~\ref{tab:splits}:
+
+\begin{table}[htbp]
+\centering
+\caption{Chronological development splits.}
+\label{tab:splits}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lll}
+\toprule
+Fold & Training period & Validation period \\
+\midrule
+1 & 2019--2022 & 2023 \\
+2 & 2019--2023 & 2024 \\
+3 & 2019--2024 & Jan--Sep 2025 \\
+Regime stress & 2019--Sep 2025 & Oct--Dec 2025 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+No shuffling is permitted. After development decisions are frozen, the final Full and Tier-1 models are independently refitted on all eligible observations through 31 December 2025.
+
+The final holdout is fixed as 1 January 2026 inclusive to 1 August 2026 exclusive. Structural checks of data presence, coverage and interval continuity were permitted before exposure, but 2026 outcome values were not used for model selection, uncertainty selection, strategy design or economic interpretation before the protocol was frozen.

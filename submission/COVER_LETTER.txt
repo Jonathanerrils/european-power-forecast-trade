@@ -1,0 +1,20 @@
+Dear Editor,
+
+Please consider the manuscript “Forecast-to-Trade under Information Constraints: Frozen Out-of-Sample Evidence from the Germany--Luxembourg Day-Ahead Electricity Market” for publication in Energy Economics.
+
+The study asks whether improvements in day-ahead electricity-price forecasting survive point-in-time information constraints and translate into economically useful storage decisions. Models are developed on 2019--2025 public ENTSO-E data and evaluated on a first-look January--July 2026 holdout under a forecast-to-trade protocol whose model-selection, uncertainty, economic and sensitivity rules were specified and frozen before holdout exposure.
+
+The Full XGBoost model reduces holdout MAE by about 40% relative to lag-24 and produces a positive S2--S1 economic contrast in all nine pre-specified efficiency--cost sensitivity cells. The paper also documents two qualifications that are economically important: the uncertainty-aware rule is algebraically a day-varying abstention threshold that exchanges aggregate profit for downside protection, and post-hoc robustness analysis shows that a simple trailing hourly profile captures most of the economic gain over lag-24 despite substantially worse point-forecast accuracy.
+
+The paper’s contribution is therefore not an algorithmic novelty claim. It is a reproducible forecast-to-decision design that integrates information timing, chronological model selection, uncertainty, economic value, sensitivity and tail-risk diagnostics. This focus fits Energy Economics’ scope in energy-market forecasting, storage value, risk and economically meaningful model evaluation. The repository preserves the frozen protocol, model artifacts, holdout inputs, machine-readable outputs, supplementary post-hoc diagnostics and a replication guide mapping manuscript results to code and data.
+
+The manuscript is original, is not under consideration elsewhere, and all reported results have been checked against the preserved research artifacts.
+
+Thank you for considering the manuscript.
+
+Sincerely,
+
+Jonathan Anthonio Nii Pedro Nelson
+Kwame Nkrumah University of Science and Technology (KNUST)
+Kumasi, Ghana
+jonathannelson707@gmail.com

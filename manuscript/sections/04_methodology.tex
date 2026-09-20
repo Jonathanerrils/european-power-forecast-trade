@@ -1,0 +1,247 @@
+\section{Methodology}
+\label{sec:methods}
+
+\subsection{Empirical design and forecast metrics}
+
+The analysis proceeds through four layers: point forecasting, forecast uncertainty, economic decision-making and tail-risk evaluation. Figure~\ref{fig:workflow} summarizes this forecast-to-trade sequence. Development choices are completed before the 2026 holdout is opened.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/fig5_forecast_to_trade_workflow.png}
+\caption{Forecast-to-trade research workflow. Public ENTSO-E data are reconstructed and aligned into Full and Tier-1 information sets, evaluated chronologically during development, passed through the selected uncertainty and economic decision layers, and then assessed on the frozen 2026 holdout.}
+\label{fig:workflow}
+\end{figure}
+
+The naive benchmarks are
+\begin{equation}
+\widehat P^{(24)}_t=P_{t-24}
+\end{equation}
+and
+\begin{equation}
+\widehat P^{(168)}_t=P_{t-168}.
+\end{equation}
+
+Point forecasts are evaluated using MAE, RMSE and median absolute error. MAE is the primary model-selection criterion:
+\begin{equation}
+MAE=\frac{1}{N}\sum_{t=1}^{N}|P_t-\widehat P_t|.
+\end{equation}
+Percentage-error measures are not used because electricity prices can be zero or negative.
+
+Every model within an outer fold is evaluated on an identical common-row set. Stress diagnostics additionally examine negative prices and realized prices above \EUR{200}/MWh and \EUR{500}/MWh.
+
+\subsection{ElasticNet benchmark}
+
+ElasticNet provides the regularized linear benchmark. Predictors are standardized within a pipeline, ensuring that scaling is refitted inside each inner training fold. The accepted benchmark uses four-fold chronological hourly \texttt{TimeSeriesSplit} cross-validation, MAE scoring, 15 logarithmically spaced \(\alpha\) values from \(10^{-3}\) to \(10^2\), and
+\[
+\rho\in\{0.1,0.5,0.9,1.0\}.
+\]
+This procedure was frozen before the later XGBoost design and was not retrospectively altered after the delivery-day inner-CV issue described below was recognized.
+
+\subsection{XGBoost model and day-aligned tuning}
+
+XGBoost uses the same Full and Tier-1 predictor sets as ElasticNet. The estimator uses the absolute-error objective, histogram tree construction and random seed 42. The pre-specified grid is
+\[
+\text{max depth}\in\{3,4,5\},
+\]
+\[
+\text{n estimators}\in\{200,400\},
+\]
+\[
+\text{learning rate}\in\{0.03,0.05,0.10\},
+\]
+and
+\[
+\text{subsample}\in\{0.8,1.0\},
+\]
+giving 36 configurations.
+
+XGBoost hyperparameters are selected using three chronological inner folds over unique Europe/Berlin \emph{delivery dates}. This keeps all 23, 24 or 25 observations of a local delivery day on the same side of an inner train-validation boundary. The choice matches the economic forecast origin: all prices for day \(D\) are formed together at D-1 11:45, so realized targets from the early hours of \(D\) should not influence model selection for later hours of that same day.
+
+The development promotion rule required Full XGBoost to improve on the frozen Full ElasticNet pipeline by more than 1\% in row-weighted outer-fold MAE. The rule was specified before the first real-data XGBoost result.
+
+\subsection{Final refit}
+
+Once the development procedure was complete, Full and Tier-1 XGBoost were refitted independently on all development data. Each information set reran the same frozen 36-configuration search; hyperparameters were not transferred from one information set to the other.
+
+The selected final configurations are reported in Table~\ref{tab:final_hyperparams}:
+
+\begin{table}[htbp]
+\centering
+\caption{Frozen final XGBoost configurations.}
+\label{tab:final_hyperparams}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+Information set & Learning rate & Depth & Trees & Subsample & Rows \\
+\midrule
+Full & 0.10 & 3 & 200 & 0.80 & 61,142 \\
+Tier-1 & 0.03 & 3 & 400 & 0.80 & 61,143 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+Model files, predictor lists and manifests were checksum-verified before holdout evaluation. Both selected final models lie on at least one boundary of the frozen tuning grid: depth 3 is the minimum candidate for both models, while the Full model also selects the maximum tested learning rate of 0.10. These boundary selections are reported as a limitation of the finite search space rather than used to expand the grid after holdout exposure.
+
+\subsection{Delivery-day-safe empirical uncertainty}
+
+Uncertainty is constructed from genuinely out-of-sample development residuals,
+\begin{equation}
+e_t=P_t-\widehat P_t.
+\end{equation}
+The outer-fold XGBoost predictions from 2023--2025 form a continuous walk-forward residual history.
+
+For delivery day \(D\), only residuals from delivery dates strictly before \(D\) are eligible. The empirical residual quantile is
+\begin{equation}
+r_D(q)=Q_q\left(\{e_t: D-w\leq delivery\_date(t)<D\}\right),
+\end{equation}
+and the corresponding hourly price quantile is
+\begin{equation}
+\widehat Q_{D,h}(q)=\widehat P_{D,h}+r_D(q).
+\end{equation}
+
+The frozen quantiles are \(q\in\{0.10,0.50,0.90\}\). Thus the nominal central 80\% interval is
+\begin{equation}
+[L_{D,h},U_{D,h}]
+=
+[\widehat Q_{D,h}(0.10),\widehat Q_{D,h}(0.90)].
+\end{equation}
+
+Candidate residual windows are \(w\in\{60,90,120,180,365\}\) delivery days. Each requires at least
+\[
+\max(1,\lfloor w/4\rfloor)
+\]
+days of history. Candidates are evaluated on one common observation set using the Winkler interval score. With \(\alpha=0.20\),
+\begin{align}
+IS_\alpha(L,U;P)
+&=(U-L)
++\frac{2}{\alpha}(L-P)\mathbf{1}(P<L) \nonumber\\
+&\quad+\frac{2}{\alpha}(P-U)\mathbf{1}(P>U).
+\end{align}
+Lower is better. The window with the lowest common-row score is selected mechanically; coverage diagnostics cannot override that result.
+
+\subsection{Economic decision rule}
+
+The economic layer is a stylized single-cycle daily storage problem. For each delivery day, all pairs \((i,j)\) satisfying \(i<j\) are candidates. The charge quantity is normalized to 1 MWh in one hourly interval, with round-trip efficiency \(\eta_{rt}\) applied to the discharge leg. Because prices are measured in EUR/MWh, reported daily and cumulative P\&L therefore have units of euros per normalized 1-MWh daily opportunity. They are not returns on a fully specified battery asset or invested capital.
+
+Throughput degradation cost is
+\begin{equation}
+C_{deg}=c(1+\eta_{rt}),
+\end{equation}
+and market transaction cost is frozen at
+\[
+C_{market}=0.
+\]
+Total cost is
+\begin{equation}
+C=C_{deg}+C_{market}.
+\end{equation}
+
+For a point forecast, the decision score is
+\begin{equation}
+Score_P(i,j)=\eta_{rt}\widehat P_j-\widehat P_i-C.
+\end{equation}
+The strategy selects the highest-scoring pair and abstains if the best score is non-positive.
+
+After the pair is fixed, realized net P\&L is
+\begin{equation}
+\Pi_D=\eta_{rt}P_{D,j^*}-P_{D,i^*}-C.
+\end{equation}
+Realized prices therefore value a decision already made from forecasts; they never select the trade.
+
+For uncertainty-aware strategies, the conservative score is
+\begin{equation}
+Score_U(i,j)=\eta_{rt}L_j-U_i-C.
+\end{equation}
+Because the residual offsets are delivery-day specific but common to all hours within day \(D\),
+\[
+L_{D,h}=\widehat P_{D,h}+r_D(0.10),\qquad
+U_{D,h}=\widehat P_{D,h}+r_D(0.90).
+\]
+Substitution gives
+\begin{align}
+Score_U(i,j)
+&=\eta_{rt}\widehat P_j-\widehat P_i-C
+   +\eta_{rt}r_D(0.10)-r_D(0.90)\\
+&=Score_P(i,j)-\tau_D,
+\end{align}
+where
+\begin{equation}
+\tau_D=r_D(0.90)-\eta_{rt}r_D(0.10).
+\end{equation}
+Thus \(\tau_D\) is constant across all candidate pairs within a delivery day. The uncertainty-aware rule therefore preserves the point strategy's ranking of intraday pairs exactly: whenever it trades, it selects the same maximizing pair as the corresponding point strategy; its only additional action is to abstain when the point strategy's best score does not exceed \(\tau_D\). Under the frozen pooled-residual construction, the uncertainty layer is therefore a day-varying abstention threshold. The marginal bounds remain useful as a conservative decision filter, but they are not a jointly calibrated interval for the price spread.
+
+The frozen strategies are:
+\begin{description}[leftmargin=1.2cm,style=nextline]
+\item[S0] no trade;
+\item[S1] lag-24 point forecast;
+\item[S2] XGBoost Full point forecast;
+\item[S3] XGBoost Full with uncertainty filter;
+\item[S4] XGBoost Tier-1 point forecast;
+\item[S5] XGBoost Tier-1 with uncertainty filter.
+\end{description}
+
+The four pre-specified contrasts are
+\begin{align}
+\Delta_{forecast}&=\Pi_{S2}-\Pi_{S1},\\
+\Delta_{uncertainty}&=\Pi_{S3}-\Pi_{S2},\\
+\Delta_{Tier1}&=\Pi_{S4}-\Pi_{S2},\\
+\Delta_{Tier1,U}&=\Pi_{S5}-\Pi_{S3}.
+\end{align}
+
+Economic comparisons use only delivery days on which every strategy has a complete intraday vector.
+
+\subsection{Sensitivity, oracle and tail risk}
+
+The primary parameters are
+\[
+\eta_{rt}=0.85,\qquad c=\EUR{10}.
+\]
+A complete sensitivity grid is frozen in advance:
+\[
+\eta_{rt}\in\{0.70,0.85,0.92\},\qquad
+c\in\{5,10,15\}.
+\]
+
+The primary holdout sign-consistency criterion concerns only \(\Delta_{forecast}\). The frozen rule classifies the result as full sign consistency when the primary cell and all nine sensitivity cells are positive, partial sign consistency when the primary cell is positive but fewer than nine cells are positive, and failure when the primary cell is non-positive. These nine cells are mechanically related sensitivity scenarios, not independent replications: the degradation cost enters as a common within-day pair cost and therefore primarily changes net value and abstention, while efficiency can also affect pair ranking.
+
+An ex-post perfect-information oracle is
+\begin{equation}
+\Pi^{oracle}_D=
+\max\left[0,\max_{i<j}(\eta_{rt}P_j-P_i-C)\right].
+\end{equation}
+It is isolated from the executable strategy and used only as an upper-bound diagnostic. Value capture is
+\begin{equation}
+VCR_s=\frac{\sum_D\Pi_{D,s}}{\sum_D\Pi^{oracle}_D}.
+\end{equation}
+
+Daily strategy loss is defined as
+\begin{equation}
+L_{D,s}=-\Pi_{D,s}.
+\end{equation}
+Empirical historical VaR and Expected Shortfall are reported at 95\% and 99\%. ES is computed from the exact worst \(m=(1-c)N\) observation-equivalents, using fractional weight at the boundary when necessary. Estimates based on fewer than 20 effective tail observations are flagged as low precision.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/fig6_chronological_evaluation_design.png}
+\caption{Chronological development and holdout design. Model and uncertainty choices are made using 2019--2025 only. The protocol is frozen before the January--July 2026 first-look holdout is evaluated.}
+\label{fig:timeline}
+\end{figure}
+
+\subsection{Post-hoc robustness analyses}
+\label{sec:posthoc_methods}
+
+After the January--July 2026 holdout had been exposed, additional diagnostics were introduced to probe the strength and interpretation of the frozen results. These analyses are explicitly supplementary and do not redefine the original frozen sign-consistency rule.
+
+First, two stronger simple economic benchmarks were added. A weekday-aware naive forecast uses lag-24 on Tuesday--Friday and lag-168 on Saturday--Monday. A trailing seven-completed-day hourly mean profile forecasts each local delivery hour by the mean realized price at that same local hour over the preceding seven completed delivery days. Because this second rule requires a seven-day warm-up, comparisons involving it use a common 205-day sample from holdout day 8 onward.
+
+Second, paired daily P\&L differences are summarized using circular moving-block bootstrap intervals with seven-day blocks, 20,000 resamples and fixed seed 20260920. These intervals are post-hoc descriptive inference and are not part of the frozen success criterion.
+
+Third, holdout interval calibration is reported for Full and Tier-1 using empirical coverage of the nominal central 80\% interval, lower- and upper-tail miss rates, mean interval width and the same Winkler score used during development. Monthly and local-hour diagnostics are treated as exploratory because they were not pre-specified.
+
+All calculations are reproduced by \texttt{scripts/posthoc\_robustness\_v1.py}; derived outputs are stored under \texttt{outputs/posthoc/robustness\_v1/}.
+\subsection{Holdout updating and frozen protocol}
+
+Figure~\ref{fig:timeline} summarizes the chronological separation between development, protocol freeze and the first-look holdout. At the start of 2026, uncertainty history consists of the development out-of-sample residuals, not in-sample residuals from the final refitted models. For each holdout day \(D\), the uncertainty snapshot is formed using eligible development residuals plus residuals from already revealed holdout days. The day-\(D\) residual is appended only after prices for \(D\) are revealed and can therefore affect \(D+1\) onward.
+
+The holdout boundary, final model-refit rule, uncertainty specification, strategy definitions, primary parameter cell, nine-cell grid, common-day rule, VaR/ES method and mechanical sign-consistency rule were all frozen before the first 2026 outcome metric was inspected. The complete holdout orchestration was rehearsed on non-holdout data before exposure. If a bug had been discovered after exposure, the protocol required preservation of the original result and explicit labeling of any corrective analysis rather than silent replacement.

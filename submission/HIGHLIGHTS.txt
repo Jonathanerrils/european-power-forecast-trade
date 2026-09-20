@@ -1,0 +1,7 @@
+Highlights
+
+• Frozen holdout links electricity-price accuracy to realized storage value
+• Full XGBoost cuts holdout MAE by 40% versus the lag-24 benchmark
+• Forecast-value gains remain positive across all nine frozen cost-efficiency cells
+• Uncertainty acts as a day-varying abstention threshold, reducing downside risk
+• Post-hoc simple profiles capture most of the economic gain despite worse MAE

@@ -107,9 +107,17 @@ The four pre-specified economic contrasts at the primary parameter setting were:
 
 The forecast-value result was positive in **all 9/9 cells** of the frozen \(3\times3\) sensitivity grid over \(\eta_{rt}\in\{0.70,0.85,0.92\}\) and \(c\in\{5,10,15\}\).
 
-The uncertainty-aware Full strategy illustrates an important trade-off rather than an automatic improvement: S3 gave up EUR 872.01 of total net P&L relative to S2, but its worst day improved from EUR -17.55 to EUR -0.83 and its trade hit rate rose from 91.9% to 99.4%. The decomposition attributes the S2→S3 gap to **EUR 952.46 of profits forgone versus EUR 80.44 of losses avoided**.
+The uncertainty-aware Full strategy illustrates an important trade-off rather than an automatic improvement: S3 gave up EUR 872.01 of total net P&L relative to S2, but its worst day improved from EUR -17.55 to EUR -0.83 and its trade hit rate rose from 91.9% to 99.4%. Because the residual offsets are common across hours within each delivery day, S3 is algebraically a day-varying abstention threshold applied to S2 rather than a different intraday pair-selection rule. The decomposition attributes the S2→S3 gap to **EUR 952.46 of profits forgone versus EUR 80.44 of losses avoided**.
 
 These are results under the frozen research contract. They are **not claims about investable return, Sharpe ratio, capital efficiency, market impact, or deployable trading profitability**.
+
+## Post-hoc robustness diagnostics
+
+After exposure to the frozen Jan--Jul 2026 holdout, supplementary diagnostics were added under `outputs/posthoc/robustness_v1/`. They include stronger simple economic baselines, 7-day moving-block bootstrap intervals, monthly S2-S1 decomposition and holdout uncertainty calibration. These analyses are explicitly post hoc and do not alter the original frozen sign-consistency rule.
+
+On the common 205-day sample required by the trailing seven-day hourly profile, Full XGBoost remains much more accurate (MAE 17.51 versus 29.28 EUR/MWh) but exceeds the trailing-profile strategy by only EUR 238.04 in net P&L. The post-hoc 7-day block-bootstrap interval for that economic difference spans zero. By contrast, the original frozen S2-S1 difference is EUR 1,437.60 and its supplementary 7-day block-bootstrap interval remains positive.
+
+See [`REPLICATION.md`](REPLICATION.md) for the manuscript-to-artifact map and exact-reproduction boundary.
 
 ## Tail-risk layer
 
@@ -149,7 +157,7 @@ On the corrected development data, \`xgboost_v1_a03fix\` re-established the XGBo
 
 The selected uncertainty method uses empirical residual quantiles \(q=\{0.10,0.50,0.90\}\), giving a nominal central 80% interval.
 
-A pre-registered sensitivity experiment compared residual windows of:
+A pre-specified sensitivity experiment compared residual windows of:
 
 \[
 [60,\ 90,\ 120,\ 180,\ 365] \text{ days}
