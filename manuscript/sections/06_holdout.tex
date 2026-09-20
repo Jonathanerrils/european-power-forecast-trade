@@ -30,7 +30,7 @@ XGBoost Tier-1 & 24.36 & 38.41 & 15.77 & 5,087 \\
 \label{fig:holdout_accuracy}
 \end{figure}
 
-Full XGBoost reduces MAE by approximately 40.3\% relative to lag-24 and 51.4\% relative to lag-168. Tier-1 XGBoost also improves upon lag-24, with an MAE approximately 16.9\% lower, but remains materially weaker than Full.
+Table~\ref{tab:holdout_forecasts} and Figure~\ref{fig:holdout_accuracy} show the same ranking. Full XGBoost reduces MAE by approximately 40.3\% relative to lag-24 and 51.4\% relative to lag-168. Tier-1 XGBoost also improves upon lag-24, with an MAE approximately 16.9\% lower, but remains materially weaker than Full.
 
 \subsection{Primary economic results}
 
@@ -65,9 +65,9 @@ The primary contrast is
 \[
 \Delta_{forecast}=S2-S1=€1,437.60.
 \]
-Thus the Full XGBoost point strategy earns approximately 7.7\% more cumulative net P\&L than the lag-24 strategy under the primary assumptions.
+Table~\ref{tab:holdout_strategy} summarizes the primary strategy outcomes, while Figure~\ref{fig:cumulative_pnl} shows their cumulative paths. The Full XGBoost point strategy earns approximately 7.7\% more cumulative net P\&L than the lag-24 strategy under the primary assumptions.
 
-\subsection{Pre-specified nine-cell confirmation test}
+\subsection{Pre-specified nine-cell sign-consistency test}
 
 \begin{table}[htbp]
 \centering
@@ -93,7 +93,7 @@ Thus the Full XGBoost point strategy earns approximately 7.7\% more cumulative n
 \label{fig:sensitivity_heatmap}
 \end{figure}
 
-The contrast is positive in all nine cells. Under the mechanical rule specified before holdout exposure, the primary forecast-value result therefore meets the criterion for \emph{confirmation}. The classification applies specifically to S2 over S1 under the frozen stylized contract; it does not imply confirmation of every secondary development finding.
+Table~\ref{tab:holdout_grid} and Figure~\ref{fig:sensitivity_heatmap} show that the contrast is positive in all nine cells. Under the mechanical rule specified before holdout exposure, the primary forecast-value result therefore satisfies the pre-specified sign-consistency criterion. The nine cells are related sensitivity scenarios rather than independent statistical confirmations, and the criterion applies specifically to S2 over S1 under the frozen stylized contract.
 
 \subsection{Uncertainty filtering}
 
@@ -155,7 +155,7 @@ S5 & 0.00 & 0.56 & 0.00 & 2.82 \\
 \end{adjustbox}
 \end{table}
 
-The holdout sample is too small for precise tail estimation. The 95\% tail contains only 10.6 effective observations and the 99\% tail 2.12. All holdout VaR and ES estimates are therefore flagged as low precision and used descriptively only.
+Table~\ref{tab:holdout_tailrisk} shows that the holdout sample is too small for precise tail estimation. The 95\% tail contains only 10.6 effective observations and the 99\% tail 2.12. All holdout VaR and ES estimates are therefore flagged as low precision and used descriptively only.
 
 \subsection{Stress-price days and concentration}
 
@@ -240,6 +240,7 @@ Tier-1 & 77.7\% & 11.3\% & 11.0\% & 71.72 & 135.31 \\
 \end{table}
 
 Overall coverage is moderately below the nominal 80\% target for both information sets. Tier-1 achieves similar coverage only with intervals about 59\% wider than Full. Calibration is not stable over time: Full monthly coverage ranges from 69.7\% in March to 88.3\% in May, while Tier-1 ranges from 56.5\% in March to 92.2\% in May. Exploratory local-hour diagnostics also show lower Full coverage around several midday and evening hours, consistent with residual heteroskedasticity that is obscured by the pooled-hour residual construction.
+
 \subsection{Holdout summary}
 
 The first-look 2026 evidence supports the primary forecast-value result. Full XGBoost retains a large accuracy advantage, and the pre-specified economic contrast \(S2-S1\) is positive at the primary setting and in all nine sensitivity cells. Tier-1 has a higher economic point estimate than lag-24, but that non-pre-specified comparison is descriptive. The uncertainty-aware rule operates as an additional day-varying abstention threshold and trades aggregate profit for substantially greater selectivity and downside protection.
