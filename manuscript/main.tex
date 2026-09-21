@@ -14,6 +14,10 @@
 \usepackage{hyperref}
 \usepackage{cleveref}
 
+\pdfstringdefDisableCommands{%
+  \def\corref#1{}%
+}
+
 \hypersetup{
   colorlinks=true,
   linkcolor=black,
@@ -25,7 +29,13 @@
 
 \journal{Energy Economics}
 
-\newcommand{\EUR}[1]{€#1}
+\newcommand{\EUR}[1]{%
+  \ifmmode
+    \text{\texteuro\,#1}%
+  \else
+    \texteuro#1%
+  \fi
+}
 
 \begin{document}
 
