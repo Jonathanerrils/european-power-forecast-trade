@@ -36,7 +36,7 @@ Table~\ref{tab:holdout_forecasts} and Figure~\ref{fig:holdout_accuracy} show the
 
 \begin{table}[htbp]
 \centering
-\caption{Frozen holdout strategy results at eta=0.85 and c=€10.}
+\caption{Frozen holdout strategy results at eta=0.85 and c=\EUR{10}.}
 \label{tab:holdout_strategy}
 \begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrrr}
@@ -63,7 +63,7 @@ S5 & 117 & 14,721.23 & 54.7\% & 99.1\% & -5.98 \\
 
 The primary contrast is
 \[
-\Delta_{forecast}=S2-S1=€1,437.60.
+\Delta_{forecast}=S2-S1=\EUR{1,437.60}.
 \]
 Table~\ref{tab:holdout_strategy} summarizes the primary strategy outcomes, while Figure~\ref{fig:cumulative_pnl} shows their cumulative paths. The Full XGBoost point strategy earns approximately 7.7\% more cumulative net P\&L than the lag-24 strategy under the primary assumptions.
 
@@ -97,40 +97,40 @@ Table~\ref{tab:holdout_grid} and Figure~\ref{fig:sensitivity_heatmap} show that 
 
 \subsection{Uncertainty filtering}
 
-The Full uncertainty-aware strategy earns €19,130.01 compared with €20,002.02 for S2, so
+The Full uncertainty-aware strategy earns \EUR{19,130.01} compared with \EUR{20,002.02} for S2, so
 \[
-\Delta_{uncertainty}=-€872.01.
+\Delta_{uncertainty}=-\EUR{872.01}.
 \]
 
 Consistent with the algebraic threshold identity in Section~\ref{sec:methods}, S2 and S3 both abstain on two days, S2 trades while S3 abstains on 50 days, and both trade on 160 days. Whenever both trade, the pair must be identical because the day-level threshold shifts every candidate pair score by the same amount; likewise, S3 cannot trade when S2 abstains. These are mechanical consequences of the frozen uncertainty construction rather than empirical discoveries.
 
-The substantive empirical result is therefore the value of the additional abstention. The filter forgoes €952.46 of profitable opportunities and avoids €80.44 of losses, reconciling to the reported aggregate gap up to rounding.
+The substantive empirical result is therefore the value of the additional abstention. The filter forgoes \EUR{952.46} of profitable opportunities and avoids \EUR{80.44} of losses, reconciling to the reported aggregate gap up to rounding.
 
-The reduction in aggregate profit is accompanied by substantial downside improvement. The hit rate rises from 91.9\% to 99.4\%, the worst day improves from -€17.55 to -€0.83, and maximum drawdown improves from approximately -€22.61 to -€0.83.
+The reduction in aggregate profit is accompanied by substantial downside improvement. The hit rate rises from 91.9\% to 99.4\%, the worst day improves from -\EUR{17.55} to -\EUR{0.83}, and maximum drawdown improves from approximately -\EUR{22.61} to -\EUR{0.83}.
 
 \subsection{Tier-1 robustness}
 
 At the primary parameters,
 \[
-S4=€19,218.41,
+S4=\EUR{19,218.41},
 \]
 giving
 \[
-\Delta_{Tier1}=S4-S2=-€783.61.
+\Delta_{Tier1}=S4-S2=-\EUR{783.61}.
 \]
 The Tier-1 contrast is negative in all nine sensitivity cells.
 
 The Tier-1 point estimate also exceeds lag-24:
 \[
-S4-S1=€653.99.
+S4-S1=\EUR{653.99}.
 \]
 This comparison was not one of the four pre-specified contrasts and is therefore reported descriptively rather than as a confirmatory economic result. In forecast accuracy, by contrast, Tier-1 materially improves on lag-24 while remaining weaker than Full.
 
-Applying the uncertainty filter to Tier-1 produces S5, which trades on only 117 days with a 99.1\% hit rate and earns €14,721.23. It forgoes €4,654.82 of profitable outcomes while avoiding only €157.64 of losses relative to S4.
+Applying the uncertainty filter to Tier-1 produces S5, which trades on only 117 days with a 99.1\% hit rate and earns \EUR{14,721.23}. It forgoes \EUR{4,654.82} of profitable outcomes while avoiding only \EUR{157.64} of losses relative to S4.
 
 \subsection{Oracle value capture}
 
-The ex-post oracle earns €21,243.10. The corresponding value-capture ratios are 87.4\% for S1, 94.2\% for S2, 90.1\% for S3, 90.5\% for S4 and 69.3\% for S5.
+The ex-post oracle earns \EUR{21,243.10}. The corresponding value-capture ratios are 87.4\% for S1, 94.2\% for S2, 90.1\% for S3, 90.5\% for S4 and 69.3\% for S5.
 
 S2 therefore captures 94.2\% of the value available to the simplified perfect-hindsight oracle under the same one-cycle constraint. This ratio is a diagnostic property of the research contract, not an estimate of the fraction of real-world battery value captured.
 
@@ -159,11 +159,11 @@ Table~\ref{tab:holdout_tailrisk} shows that the holdout sample is too small for 
 
 \subsection{Stress-price days and concentration}
 
-The holdout contains 69 negative-price days, 47 days with a price above €200/MWh and three days above €500/MWh. On negative-price days,
+The holdout contains 69 negative-price days, 47 days with a price above \EUR{200}/MWh and three days above \EUR{500}/MWh. On negative-price days,
 \[
-\Delta_{forecast}=€153.01,
+\Delta_{forecast}=\EUR{153.01},
 \]
-while on the remaining days it is €1,284.58. On days above €200/MWh, the contrast remains positive at €262.60. The three days above €500/MWh yield identical cumulative P\&L across active strategies, so no separate inference is drawn from that very small subgroup.
+while on the remaining days it is \EUR{1,284.58}. On days above \EUR{200}/MWh, the contrast remains positive at \EUR{262.60}. The three days above \EUR{500}/MWh yield identical cumulative P\&L across active strategies, so no separate inference is drawn from that very small subgroup.
 
 S2's profits are not dominated by one extreme day: the top 1\%, 5\% and 10\% of holdout days account for 8.0\%, 18.6\% and 28.4\% of total S2 net P\&L, respectively.
 
@@ -172,31 +172,31 @@ S2's profits are not dominated by one extreme day: the top 1\%, 5\% and 10\% of 
 
 The following analyses were introduced only after exposure to the 2026 holdout and therefore do not alter the frozen primary result.
 
-\paragraph{Stronger simple economic benchmarks.}
-To compare XGBoost with simple rules that exploit recurring intraday structure, a weekday-aware naive benchmark and a trailing seven-day hourly mean profile were evaluated post hoc. The trailing-profile rule requires seven completed prior holdout days, so Table~\ref{tab:posthoc_benchmarks} uses the common 205-day sample from 8 January through 31 July 2026.
+\paragraph{Stronger simple economic benchmarks}
+To compare XGBoost with simple rules that exploit recurring intraday structure, a weekday-aware naive benchmark and a trailing seven-day hourly mean profile were evaluated post hoc. The trailing profile is evaluated on all 212 holdout days by using late-December 2025 realized price profiles to initialize the first seven January forecasts. Thus Table~\ref{tab:posthoc_benchmarks} uses the same 5,087 hourly observations and 212 delivery days as the frozen holdout.
 
 \begin{table}[htbp]
 \centering
-\caption{Post-hoc simple-benchmark comparison on the common 205-day sample.}
+\caption{Post-hoc simple-benchmark comparison on the full 212-day holdout sample.}
 \label{tab:posthoc_benchmarks}
 \begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrr}
 \toprule
 Strategy & MAE & RMSE & Net P\&L & Oracle share \\
 \midrule
-Lag-24 & 29.06 & 46.84 & 18,495.13 & 87.8\% \\
-Weekday-aware naive & 29.89 & 47.77 & 18,372.81 & 87.2\% \\
-Trailing 7-day mean profile & 29.28 & 43.59 & 19,630.98 & 93.2\% \\
-XGBoost Tier-1 & 24.25 & 38.49 & 19,142.04 & 90.9\% \\
-XGBoost Full & \textbf{17.51} & \textbf{30.06} & \textbf{19,869.02} & \textbf{94.3\%} \\
+Lag-24 & 29.33 & 46.86 & 18,564.42 & 87.4\% \\
+Weekday-aware naive & 30.00 & 47.69 & 18,374.95 & 86.5\% \\
+Trailing 7-day mean profile & 29.56 & 43.73 & 19,722.29 & 92.8\% \\
+XGBoost Tier-1 & 24.36 & 38.41 & 19,218.41 & 90.5\% \\
+XGBoost Full & \textbf{17.51} & \textbf{29.87} & \textbf{20,002.02} & \textbf{94.2\%} \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \end{table}
 
-Full XGBoost remains the most accurate model by a wide margin on this common sample, but the economic comparison is considerably tighter. Its net P\&L exceeds the trailing-profile rule by only €238.04. Tier-1 trails the trailing profile by €488.94. This shows that much of the economic value can be captured by a simple rule that learns the recurring hourly price shape, even though that rule has substantially worse point-forecast MAE than Full XGBoost.
+Full XGBoost remains the most accurate model by a wide margin, but the economic comparison is considerably tighter. Its net P\&L exceeds the seven-day trailing-profile rule by \EUR{279.73}. Relative to lag-24, the trailing profile captures 80.5\% of Full's \EUR{1,437.60} incremental gain. Tier-1 trails the trailing profile by \EUR{503.88}. Across an exploratory 3-, 7-, 10-, 14-, 21- and 28-day profile family, Full's margin ranges from approximately \EUR{279.73} to \EUR{492.44}; the seven-day specification is the strongest of those simple benchmarks against Full. This shows that a large share of the economic value can be captured by a simple rule that learns the recurring hourly price shape, even though that rule has substantially worse point-forecast MAE than Full XGBoost.
 
-\paragraph{Paired daily inference.}
+\paragraph{Paired daily inference}
 Table~\ref{tab:posthoc_bootstrap} reports seven-day moving-block bootstrap intervals for selected daily P\&L contrasts. These intervals are supplementary and were not part of the frozen success criterion.
 
 \begin{table}[htbp]
@@ -209,18 +209,22 @@ Table~\ref{tab:posthoc_bootstrap} reports seven-day moving-block bootstrap inter
 Contrast & Days & Total difference & 95\% interval & Wins & Losses \\
 \midrule
 S2--S1 & 212 & 1,437.60 & [752.08, 2,140.98] & 95 & 63 \\
-S3--S2 & 212 & -872.01 & [-1,459.21, -359.39] & 16 & 34 \\
-S4--S2 & 212 & -783.61 & [-1,267.64, -348.12] & 49 & 97 \\
-S5--S3 & 212 & -4,408.77 & [-6,189.90, -2,741.33] & 29 & 91 \\
-S2--Trailing 7-day & 205 & 238.04 & [-110.21, 573.81] & 84 & 57 \\
+S3--S2 & 212 & -872.01 & [-1,465.17, -358.72] & 16 & 34 \\
+S4--S2 & 212 & -783.61 & [-1,270.35, -340.96] & 49 & 97 \\
+S5--S3 & 212 & -4,408.77 & [-6,229.93, -2,728.84] & 29 & 91 \\
+S2--Trailing 7-day & 212 & 279.73 & [-89.49, 640.59] & 87 & 61 \\
+S4--Trailing 7-day & 212 & -503.88 & [-1,044.44, -53.68] & 62 & 73 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \end{table}
 
-The frozen S2--S1 contrast remains positive under this supplementary paired analysis. By contrast, the Full XGBoost advantage over the post-hoc trailing-profile rule is much smaller and its block-bootstrap interval includes zero. The monthly S2--S1 decomposition is also uneven: January, February and March contribute €340.52, €367.45 and €300.87 respectively; April--June contribute €433.70 in total; July is approximately flat at -€4.94.
+The frozen S2--S1 contrast remains positive under this supplementary paired analysis. By contrast, the Full XGBoost advantage over the post-hoc trailing-profile rule is much smaller and its block-bootstrap interval includes zero. Tier-1 is lower than the trailing profile by \EUR{503.88}, and that post-hoc block-bootstrap interval excludes zero. The monthly S2--S1 decomposition is also uneven: January, February and March contribute \EUR{340.52}, \EUR{367.45} and \EUR{300.87} respectively, or about 70.2\% of the full \EUR{1,437.60} contrast; April--June contribute \EUR{433.70} in total; July is approximately flat at -\EUR{4.94}.
 
-\paragraph{Holdout interval calibration.}
+\paragraph{Threshold-frontier diagnostic}
+Because the frozen pooled-residual uncertainty rule is an abstention threshold, a post-hoc fixed-threshold frontier helps interpret whether its economic behavior is distinctive. A constant threshold of approximately \EUR{42.50} produces 160 trades, the same count as S3, and overlaps with S3 on 158 of those trading days; it earns \EUR{19,079.26} compared with \EUR{19,130.01} for S3. A lower fixed threshold of \EUR{20} trades on 187 days, earns \EUR{19,919.24}, achieves a 96.8\% hit rate and has a worst day of -\EUR{8.38}. These exploratory results reinforce that the frozen S3 rule mainly implements a time-varying participation hurdle rather than extracting a materially different intraday price pair.
+
+\paragraph{Holdout interval calibration}
 Table~\ref{tab:posthoc_calibration} summarizes post-hoc calibration of the nominal central 80\% intervals.
 
 \begin{table}[htbp]

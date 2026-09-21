@@ -78,7 +78,7 @@ models:
 
 uncertainty:
   quantiles: [0.1, 0.5, 0.9]
-  # 60 days, selected by a pre-registered sensitivity experiment across
+  # 60 days, selected by a pre-specified sensitivity experiment across
   # [60, 90, 120, 180, 365] candidates (run_uncertainty_sensitivity.py),
   # scored by interval score on a common-row-corrected comparison
   # (every candidate evaluated on the identical n=24,115 rows -- see
@@ -88,7 +88,7 @@ uncertainty:
   # the original hourly-information-set selection also chose 60 days
   # (uncertainty_selected_v1, kept for the historical record, not deleted),
   # and 180 was an even earlier provisional value (uncertainty_v2). Changing
-  # this value again requires a new pre-registered sensitivity run, not an
+  # this value again requires a new pre-specified sensitivity run, not an
   # ad hoc edit -- see the "post-result tuning" discipline documented in
   # README Process notes. NOTE: run_uncertainty.py's consequential 3-argument
   # form reads window_days directly from the named sensitivity run's own

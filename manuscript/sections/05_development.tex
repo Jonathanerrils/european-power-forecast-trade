@@ -25,9 +25,9 @@ Oct--Dec 2025 & 25.76 & 34.71 & 20.00 & 24.44 & \textbf{15.64} & 23.13 \\
 
 Full XGBoost has the lowest MAE in every outer fold. Relative to lag-24, the MAE reduction is approximately 38.3\% in 2023, 41.2\% in 2024, 36.7\% in January--September 2025 and 39.3\% in the October--December regime-stress period. The post-cutover result is particularly relevant because it shows that the forecasting advantage does not disappear immediately after the 15-minute SDAC transition.
 
-Tier-1 XGBoost also improves on lag-24 in every fold, but its error remains materially higher than Full XGBoost. This gap establishes that the renewable-related Tier-2 predictors carry substantial predictive information while simultaneously making their unresolved point-in-time status consequential.
+Tier-1 XGBoost also improves on lag-24 in every fold, but its error remains materially higher than Full XGBoost. Relative to Tier-1 ElasticNet, the row-weighted Tier-1 XGBoost MAE improves only modestly, from approximately \EUR{23.70}/MWh to \EUR{23.01}/MWh (about 2.9\%). Thus much of the Full-versus-Tier-1 gap is associated with the information set rather than a large nonlinear-model advantage within Tier-1. This gap establishes that the renewable-related Tier-2 predictors carry substantial predictive information while simultaneously making their unresolved point-in-time status consequential.
 
-The row-weighted Full ElasticNet MAE is €19.898/MWh, while Full XGBoost attains €16.470/MWh. The relative reduction,
+The row-weighted Full ElasticNet MAE is \EUR{19.898}/MWh, while Full XGBoost attains \EUR{16.470}/MWh. The relative reduction,
 \[
 \frac{19.898-16.470}{19.898}=17.2\%,
 \]
@@ -56,7 +56,7 @@ Window (days) & Empirical coverage & Mean width & Interval score \\
 \end{adjustbox}
 \end{table}
 
-The 365-day window is closest to the nominal 80\% coverage but produces materially wider intervals. Under the frozen selection rule, the 60-day window wins because it has the lowest common-row Winkler score. Its empirical coverage by fold is 80.1\%, 78.6\%, 77.8\% and 79.1\%, respectively, all within the three-percentage-point diagnostic tolerance around the nominal level.
+The 365-day window is closest to the nominal 80\% coverage but produces materially wider intervals. Under the frozen selection rule, the 60-day window wins because it has the lowest common-row Winkler score. The selected 60-day window is also the shortest candidate in the tested grid, so its optimum lies on the search boundary and shorter windows were not evaluated. Table~\ref{tab:uncertainty_windows} uses the common 24,115-row intersection required for fair comparison across all candidate windows, giving pooled coverage 78.25\%. The subsequent selected-window calibration uses every row available to the 60-day method; this adds earlier eligible observations in fold 1 and yields fold coverages of 80.1\%, 78.6\%, 77.8\% and 79.1\%, respectively. The difference therefore reflects row-set scope, not conflicting calculations.
 
 \subsection{Development economic evidence}
 
@@ -64,7 +64,7 @@ At the primary economic specification, 1,081 common development delivery days ar
 
 \begin{table}[htbp]
 \centering
-\caption{Development-sample strategy results at eta=0.85 and c=€10.}
+\caption{Development-sample strategy results at eta=0.85 and c=\EUR{10}.}
 \label{tab:dev_strategy}
 \begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrrr}
@@ -84,33 +84,33 @@ S5 & 297 & 29,155.17 & 26.5\% & 96.6\% & -55.05 \\
 
 The primary forecast-value contrast is
 \[
-\Delta_{forecast}=S2-S1=€8,294.78.
+\Delta_{forecast}=S2-S1=\EUR{8,294.78}.
 \]
 The Full point strategy therefore converts the forecasting advantage into higher realized economic value during development.
 
 The Tier-1 cost is
 \[
-\Delta_{Tier1}=S4-S2=-€6,724.85,
+\Delta_{Tier1}=S4-S2=-\EUR{6,724.85},
 \]
 showing that restricting the information set materially reduces the development economic result.
 
-The primary forecast-value contrast is positive in all nine pre-specified efficiency--cost cells. Across the grid it ranges from €7,222.18 to €8,773.47. The Tier-1 contrast is negative in all nine cells.
+The primary forecast-value contrast is positive in all nine pre-specified efficiency--cost cells. Across the grid it ranges from \EUR{7,222.18} to \EUR{8,773.47}. The Tier-1 contrast is negative in all nine cells.
 
 \subsection{Uncertainty as a selectivity mechanism}
 
 The development uncertainty contrast is
 \[
-\Delta_{uncertainty}=S3-S2=-€8,760.73.
+\Delta_{uncertainty}=S3-S2=-\EUR{8,760.73}.
 \]
-The sign is negative in all nine economic sensitivity cells. The decomposition shows that S3 forgoes approximately €9,339.10 of profitable opportunities while avoiding approximately €578.37 of losses.
+The sign is negative in all nine economic sensitivity cells. The decomposition shows that S3 forgoes approximately \EUR{9,339.10} of profitable opportunities while avoiding approximately \EUR{578.37} of losses.
 
-This pattern is accompanied by substantially lower trading frequency and better realized downside. S2 trades on 1,065 days with a hit rate of 92.5\%, whereas S3 trades on only 652 days with a hit rate of 98.9\%. The worst day improves from -€28.00 to -€17.24, and maximum drawdown improves from approximately -€37.51 to -€17.24.
+This pattern is accompanied by substantially lower trading frequency and better realized downside. S2 trades on 1,065 days with a hit rate of 92.5\%, whereas S3 trades on only 652 days with a hit rate of 98.9\%. The worst day improves from -\EUR{28.00} to -\EUR{17.24}, and maximum drawdown improves from approximately -\EUR{37.51} to -\EUR{17.24}.
 
 The uncertainty layer therefore behaves primarily as an abstention mechanism rather than a source of higher development profit.
 
 \subsection{Oracle value capture and tail risk}
 
-The development ex-post oracle produces €72,955.08. Value-capture ratios are 77.6\% for S1, 89.0\% for S2, 77.0\% for S3, 79.7\% for S4 and 40.0\% for S5. Table~\ref{tab:dev_tailrisk} reports the corresponding empirical daily-loss tail diagnostics.
+The development ex-post oracle produces \EUR{72,955.08}. Value-capture ratios are 77.6\% for S1, 89.0\% for S2, 77.0\% for S3, 79.7\% for S4 and 40.0\% for S5. Table~\ref{tab:dev_tailrisk} reports the corresponding empirical daily-loss tail diagnostics.
 
 \begin{table}[htbp]
 \centering
