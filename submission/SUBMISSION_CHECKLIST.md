@@ -24,10 +24,10 @@
 - [x] Tail-risk outputs preserved.
 - [x] Post-hoc robustness script and core outputs preserved.
 - [x] Manuscript-to-artifact map added in REPLICATION.md.
-- [ ] Archive the exact final derived feature dataset used for the manuscript, subject to ENTSO-E terms.
-- [ ] Record SHA-256 checksum of the archived feature dataset.
-- [ ] Create a stable repository release for the submission version.
-- [ ] Archive the submission release on Zenodo or equivalent and record its DOI.
+- [x] Archive the exact final derived feature dataset used for the manuscript, subject to ENTSO-E terms. Dataset DOI: `10.5281/zenodo.22883513`.
+- [x] Record SHA-256 checksum of the archived feature dataset: `C9B64768F98857E92EAEB72D0BD3D107770541FD563CE0D14AEFC6D4A46795AD`.
+- [x] Create a stable repository release for the submission version: `energy-economics-submission-v2`.
+- [x] Archive the submission release on Zenodo. Version DOI: `10.5281/zenodo.22878011`; concept DOI: `10.5281/zenodo.22878010`.
 - [ ] Verify a clean-environment rerun of the replication instructions.
 
 ## Journal-facing files
@@ -52,7 +52,7 @@
 - [x] All nine figures checked for legibility.
 - [x] Page breaks and float placement reviewed in the final PDF.
 - [x] Final PDF exported and key reported results checked against preserved artifacts.
-- [ ] Freeze final submission commit/tag only after all checks pass.
+- [x] Freeze final analytical submission tag: `energy-economics-submission-v2`.
 
 ## Submission discipline
 The January--July 2026 holdout is already exposed. Do not use it to tune new models, thresholds, uncertainty methods or information sets. Any redesigned method should be frozen before evaluation on a new untouched period.
