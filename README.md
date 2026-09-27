@@ -1,5 +1,7 @@
 # European Day-Ahead Power Forecast-to-Trade & Tail-Risk System
 
+[![DOI](https://zenodo.org/badge/1349712383.svg)](https://doi.org/10.5281/zenodo.22878010)
+
 An end-to-end research pipeline for **Germany-Luxembourg (DE-LU) day-ahead electricity prices**, from ENTSO-E ingestion and leakage-safe forecasting through uncertainty quantification, a stylized forecast-to-trade layer, tail-risk analysis, and a single frozen 2026 holdout.
 
 ## Current status
@@ -118,6 +120,10 @@ After exposure to the frozen Jan--Jul 2026 holdout, supplementary diagnostics we
 Using late-December 2025 realized price profiles to initialize the first seven January forecasts, the trailing seven-day hourly profile can be evaluated on the full 212-day holdout. Full XGBoost remains much more accurate (MAE 17.51 versus 29.56 EUR/MWh) but exceeds the trailing-profile strategy by only EUR 279.73 in net P&L; the post-hoc 7-day block-bootstrap interval spans zero. Across an exploratory 3--28-day profile family, Full's margin ranges from about EUR 279.73 to EUR 492.44. By contrast, the original frozen S2-S1 difference is EUR 1,437.60 and its supplementary 7-day block-bootstrap interval remains positive.
 
 See [`REPLICATION.md`](REPLICATION.md) for the manuscript-to-artifact map and exact-reproduction boundary.
+
+**Archived submission software:** https://doi.org/10.5281/zenodo.22878011  
+**Archived exact derived feature snapshot:** https://doi.org/10.5281/zenodo.22883513  
+**Dataset SHA-256:** `C9B64768F98857E92EAEB72D0BD3D107770541FD563CE0D14AEFC6D4A46795AD`
 
 ## Tail-risk layer
 
