@@ -1,0 +1,49 @@
+name: Compile manuscript PDF
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - submission/doi-replication-final
+    paths:
+      - "manuscript/**"
+      - "outputs/eda/delu_features/development/development_a03fix_v1/figures/**"
+      - ".github/workflows/compile-manuscript.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX manuscript
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: manuscript
+          latexmk_use_xelatex: false
+          args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
+
+      - name: Verify PDF exists
+        run: |
+          test -s manuscript/main.pdf
+          pdfinfo manuscript/main.pdf | tee manuscript/pdfinfo.txt
+          echo "PDF_SHA256=$(sha256sum manuscript/main.pdf | awk '{print $1}')" | tee manuscript/pdf_sha256.txt
+
+      - name: Upload compiled manuscript
+        uses: actions/upload-artifact@v4
+        with:
+          name: energy-economics-manuscript-pdf
+          path: |
+            manuscript/main.pdf
+            manuscript/main.log
+            manuscript/pdfinfo.txt
+            manuscript/pdf_sha256.txt
+          if-no-files-found: error
+          retention-days: 30
