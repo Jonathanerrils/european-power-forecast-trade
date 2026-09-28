@@ -23,6 +23,19 @@ SEED = 20260920
 BOOTSTRAP_REPS = 20_000
 BLOCK = 7
 PROFILE_WINDOWS = [3, 7, 10, 14, 21, 28]
+ZERO_TOL = 1e-9
+CSV_FLOAT_FORMAT = "%.9f"
+
+
+def write_csv(frame, filename):
+    """Write deterministic cross-platform CSV output for archived diagnostics."""
+    frame.to_csv(
+        OUT / filename,
+        index=False,
+        float_format=CSV_FLOAT_FORMAT,
+        date_format="%Y-%m-%d",
+    )
+
 
 h = pd.read_csv(H, parse_dates=["timestamp_utc"])
 h = h.loc[h["common_evaluation_day"].astype(bool)].copy()
@@ -114,7 +127,7 @@ for date in dates:
         forecast_cache[(date, f"trailing{window}_profile")] = pred
 
 bench = pd.DataFrame(bench, columns=["delivery_date", "strategy", "net_pnl"])
-bench.to_csv(OUT / "posthoc_benchmark_per_day.csv", index=False)
+write_csv(bench, "posthoc_benchmark_per_day.csv")
 
 # Full 212-day/5,087-hour benchmark comparison.
 oracle = d["oracle_pnl"].sum()
@@ -147,7 +160,7 @@ summary = pd.DataFrame(
 )
 order = ["Lag-24", "Weekday-aware naive", "Trailing 7-day mean profile", "XGBoost Tier-1", "XGBoost Full"]
 summary["strategy"] = pd.Categorical(summary["strategy"], categories=order, ordered=True)
-summary.sort_values("strategy").to_csv(OUT / "posthoc_benchmark_summary.csv", index=False)
+write_csv(summary.sort_values("strategy"), "posthoc_benchmark_summary.csv")
 
 # Profile-window sensitivity, introduced after holdout exposure.
 full_pnl = float(d["S2_net_pnl"].sum())
@@ -159,11 +172,14 @@ for window in PROFILE_WINDOWS:
     pnl = float(bench.loc[bench["strategy"].eq(strategy), "net_pnl"].sum())
     gain = pnl - lag24_pnl
     window_rows.append([window, pnl, full_pnl - pnl, gain, gain / full_gain])
-pd.DataFrame(
-    window_rows,
-    columns=["window_days", "benchmark_net_pnl", "full_minus_benchmark",
-             "benchmark_gain_over_lag24", "share_of_full_gain_over_lag24"],
-).to_csv(OUT / "posthoc_profile_window_sensitivity.csv", index=False)
+write_csv(
+    pd.DataFrame(
+        window_rows,
+        columns=["window_days", "benchmark_net_pnl", "full_minus_benchmark",
+                 "benchmark_gain_over_lag24", "share_of_full_gain_over_lag24"],
+    ),
+    "posthoc_profile_window_sensitivity.csv",
+)
 
 # Deterministic xorshift32 RNG so archived bootstrap CSVs are exactly reproducible.
 def _xorshift32(seed):
@@ -208,21 +224,27 @@ for name, x in contrasts.items():
     lo, hi = moving_block_ci(x)
     inf.append([
         name, len(x), x.sum(), x.mean(), x.std(ddof=1),
-        lo, hi, (x > 0).sum(), (x < 0).sum(), (x == 0).sum()
+        lo, hi, (x > ZERO_TOL).sum(), (x < -ZERO_TOL).sum(), (x.abs() <= ZERO_TOL).sum()
     ])
-pd.DataFrame(
-    inf,
-    columns=["contrast", "n_days", "total_difference", "mean_daily_difference",
-             "sd_daily_difference", "block7_ci_low", "block7_ci_high",
-             "wins", "losses", "ties"],
-).to_csv(OUT / "posthoc_block_bootstrap.csv", index=False)
+write_csv(
+    pd.DataFrame(
+        inf,
+        columns=["contrast", "n_days", "total_difference", "mean_daily_difference",
+                 "sd_daily_difference", "block7_ci_low", "block7_ci_high",
+                 "wins", "losses", "ties"],
+    ),
+    "posthoc_block_bootstrap.csv",
+)
 
 m = d.assign(
     month=d["delivery_date"].dt.to_period("M").astype(str),
     delta=d["S2_net_pnl"] - d["S1_net_pnl"],
 )
-m.groupby("month").agg(n_days=("delta", "size"), s2_minus_s1=("delta", "sum")).reset_index().to_csv(
-    OUT / "posthoc_monthly_s2_s1.csv", index=False
+write_csv(
+    m.groupby("month")
+     .agg(n_days=("delta", "size"), s2_minus_s1=("delta", "sum"))
+     .reset_index(),
+    "posthoc_monthly_s2_s1.csv",
 )
 
 # Fixed-threshold frontier for interpreting the pooled-residual S3 rule.
@@ -249,11 +271,14 @@ for tau in [0, 20, 30, 40, 42.5, 50, 60]:
         overlap, int(np.sum(traded & ~s3_trade.to_numpy(bool))),
         int(np.sum(~traded & s3_trade.to_numpy(bool))),
     ])
-pd.DataFrame(
-    frontier_rows,
-    columns=["threshold", "trades", "net_pnl", "hit_rate", "worst_day", "max_drawdown",
-             "overlap_with_s3", "threshold_only", "s3_only"],
-).to_csv(OUT / "posthoc_threshold_frontier.csv", index=False)
+write_csv(
+    pd.DataFrame(
+        frontier_rows,
+        columns=["threshold", "trades", "net_pnl", "hit_rate", "worst_day", "max_drawdown",
+                 "overlap_with_s3", "threshold_only", "s3_only"],
+    ),
+    "posthoc_threshold_frontier.csv",
+)
 
 def calibration(frame, lo, hi):
     y = frame["price_eur_mwh"].to_numpy(float)
@@ -268,29 +293,38 @@ def calibration(frame, lo, hi):
 overall = []
 for label, lo, hi in [("Full", "full_L", "full_U"), ("Tier-1", "tier1_L", "tier1_U")]:
     overall.append([label] + calibration(h, lo, hi))
-pd.DataFrame(
-    overall,
-    columns=["information_set", "n", "coverage", "lower_miss", "upper_miss",
-             "mean_width", "winkler_score"],
-).to_csv(OUT / "posthoc_calibration_overall.csv", index=False)
+write_csv(
+    pd.DataFrame(
+        overall,
+        columns=["information_set", "n", "coverage", "lower_miss", "upper_miss",
+                 "mean_width", "winkler_score"],
+    ),
+    "posthoc_calibration_overall.csv",
+)
 
 month_rows = []
 h["month"] = h["delivery_date"].dt.to_period("M").astype(str)
 for month, g in h.groupby("month"):
     for label, lo, hi in [("Full", "full_L", "full_U"), ("Tier-1", "tier1_L", "tier1_U")]:
         month_rows.append([month, label] + calibration(g, lo, hi))
-pd.DataFrame(
-    month_rows,
-    columns=["month", "information_set", "n", "coverage", "lower_miss", "upper_miss",
-             "mean_width", "winkler_score"],
-).to_csv(OUT / "posthoc_calibration_monthly.csv", index=False)
+write_csv(
+    pd.DataFrame(
+        month_rows,
+        columns=["month", "information_set", "n", "coverage", "lower_miss", "upper_miss",
+                 "mean_width", "winkler_score"],
+    ),
+    "posthoc_calibration_monthly.csv",
+)
 
 hour_rows = []
 for hour, g in h.groupby("local_hour"):
     for label, lo, hi in [("Full", "full_L", "full_U"), ("Tier-1", "tier1_L", "tier1_U")]:
         hour_rows.append([hour, label] + calibration(g, lo, hi))
-pd.DataFrame(
-    hour_rows,
-    columns=["local_hour", "information_set", "n", "coverage", "lower_miss", "upper_miss",
-             "mean_width", "winkler_score"],
-).to_csv(OUT / "posthoc_calibration_by_hour.csv", index=False)
+write_csv(
+    pd.DataFrame(
+        hour_rows,
+        columns=["local_hour", "information_set", "n", "coverage", "lower_miss", "upper_miss",
+                 "mean_width", "winkler_score"],
+    ),
+    "posthoc_calibration_by_hour.csv",
+)

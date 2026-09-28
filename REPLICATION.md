@@ -14,6 +14,18 @@ The final Full and Tier-1 XGBoost refit commit is:
 
 `54a7c2e77122134eca31a09798cc1614df1c634c`
 
+The exact manuscript-associated software release is archived at:
+
+`https://doi.org/10.5281/zenodo.22878011`
+
+The exact derived feature-matrix snapshot is archived separately at:
+
+`https://doi.org/10.5281/zenodo.22883513`
+
+SHA-256 of `delu_features.parquet`:
+
+`C9B64768F98857E92EAEB72D0BD3D107770541FD563CE0D14AEFC6D4A46795AD`
+
 ## Software environment
 
 Create a clean Python environment and install the locked dependencies:
@@ -45,7 +57,9 @@ Raw and general processed source-data directories are not committed because they
 2. **Development outputs and model-selection evidence** are preserved in versioned `outputs/` directories.
 3. **A byte-for-byte reconstruction of the original entire processed feature dataset from a fresh API pull is not presently guaranteed**, because historical source revisions and the untracked full processed feature file can differ from the original research snapshot.
 
-Before journal submission, the exact derived feature file used for the final manuscript should be deposited in a stable research archive, subject to ENTSO-E redistribution terms, together with its SHA-256 checksum and this repository release DOI. This is the principal remaining replication-package gate.
+The exact derived feature file used for the manuscript has now been deposited as a restricted-file Zenodo dataset at `https://doi.org/10.5281/zenodo.22883513`. Its public metadata identify the preserved snapshot, while file access remains restricted because underlying ENTSO-E source data remain subject to applicable source-data rights and reuse conditions. The archived file contains 66,455 rows and 31 columns spanning 2018-12-31 23:00 UTC through 2026-07-31 21:00 UTC, and its SHA-256 checksum is recorded above.
+
+A clean clone can validate the committed test suite, repository-integrity checks and post-hoc holdout analyses without this restricted feature file. Full upstream reconstruction from ingestion through feature engineering requires the archived feature snapshot or a fresh ENTSO-E retrieval; a fresh retrieval is not guaranteed to be byte-identical because historical source records can subsequently be revised.
 
 ## Frozen holdout: exact machine-readable inputs
 
@@ -123,21 +137,31 @@ Final fitted XGBoost models and manifests:
 | Post-hoc benchmark table | `outputs/posthoc/robustness_v1/posthoc_benchmark_summary.csv` |
 | Post-hoc block-bootstrap table | `outputs/posthoc/robustness_v1/posthoc_block_bootstrap.csv` |
 | Post-hoc monthly S2-S1 decomposition | `outputs/posthoc/robustness_v1/posthoc_monthly_s2_s1.csv` |
+| Post-hoc profile-window sensitivity | `outputs/posthoc/robustness_v1/posthoc_profile_window_sensitivity.csv` |
+| Post-hoc threshold frontier | `outputs/posthoc/robustness_v1/posthoc_threshold_frontier.csv` |
 | Post-hoc interval calibration | `outputs/posthoc/robustness_v1/posthoc_calibration_*.csv` |
 
-## Post-hoc robustness reproduction
+## Clean-environment verification
 
-Run:
+From a fresh clone of the tagged software release:
 
 ```bash
+python -m venv .venv
+# activate .venv for your platform
+python -m pip install --upgrade pip
+pip install -r requirements-lock.txt
+python -m pytest tests/ -v
+python scripts/run_all_checks.py
 python scripts/posthoc_robustness_v1.py
 ```
 
-This produces the supplementary benchmark, 7-day moving-block bootstrap, monthly-decomposition and calibration outputs under:
+The first two commands verify the code-level regression and repository-integrity safeguards. The final command regenerates the supplementary post-hoc benchmark, moving-block bootstrap, profile-window sensitivity, threshold-frontier, monthly-decomposition and calibration outputs under:
 
 `outputs/posthoc/robustness_v1/`
 
-These analyses were introduced after holdout exposure and must not be described as part of the original frozen protocol.
+A GitHub Actions clean-run workflow is also provided in `.github/workflows/replication-smoke.yml` and performs the same smoke-test sequence on a fresh Ubuntu runner.
+
+These post-hoc analyses were introduced after holdout exposure and must not be described as part of the original frozen protocol.
 
 ## Primary pipeline entry points
 
