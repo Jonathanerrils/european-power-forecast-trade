@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - submission/doi-replication-final
+      - submission/energy-economics-final-2026-09-28
     paths:
       - "manuscript/**"
       - "outputs/eda/delu_features/development/development_a03fix_v1/figures/**"
