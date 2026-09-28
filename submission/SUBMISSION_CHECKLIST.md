@@ -40,8 +40,8 @@
 - [x] Data/code availability section present.
 - [x] Generative-AI declaration updated to current Elsevier policy.
 - [x] Final acknowledgements text included.
-- [ ] Verify whether a graphical abstract is requested/desired at actual submission.
-- [ ] Confirm current submission-system metadata immediately before upload.
+- [x] Verify graphical-abstract status: current Elsevier guidance treats it as optional; omit for initial submission unless the journal portal specifically requests one.
+- [ ] Confirm the prepared fields in `submission/SUBMISSION_METADATA.md` against the live Editorial Manager form immediately before upload.
 - [x] Final author name, KNUST affiliation and corresponding-author details confirmed.
 
 ## Final document QA
