@@ -4,10 +4,11 @@ Date: 2026-09-28
 
 ## Repository state
 
-- Final merged commit: `28967737a0959b86be34468064bf17e512348330`
+- Final merged `main` commit: `28967737a0959b86be34468064bf17e512348330`
 - Final submission branch: `submission/energy-economics-final-2026-09-28`
-- Manuscript compile source commit: `502f5c065f7b4fec0c37811bcbb423bcb96b2198`
-- Final GitHub Actions PDF SHA-256: `1c85168589476542a5e23b31f87291a410ed9419aa5c0baa214299d67d7cdaaa`
+- Final submission-branch metadata head before this freeze-record refresh: `9f58e57f349e47f000278a91546533b73d925e28`
+- Final manuscript compile source commit: `73ac2adca1ee98d967ba5157f5cc119f23b47626`
+- Final GitHub Actions PDF SHA-256: `d7c704c8c943824883f4f631626d5cb2998a3d923981a56062de4d1998cdda43`
 
 ## Author metadata
 
@@ -29,8 +30,10 @@ Date: 2026-09-28
 - Regression suite: 522 tests passed.
 - Repository-integrity checks: passed.
 - Post-hoc robustness regeneration and semantic comparison: passed.
-- GitHub Actions LaTeX compile: passed.
+- GitHub Actions LaTeX compile: passed on the six-keyword final manuscript.
 - Bibliography and manuscript figures resolved in the compiled PDF.
+- Submission metadata sheet: `submission/SUBMISSION_METADATA.md`.
+- Graphical abstract: optional under current Elsevier guidance; not planned unless requested by the live submission portal.
 
 ## Submission discipline
 
