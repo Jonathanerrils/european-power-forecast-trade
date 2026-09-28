@@ -28,7 +28,7 @@
 - [x] Record SHA-256 checksum of the archived feature dataset: `C9B64768F98857E92EAEB72D0BD3D107770541FD563CE0D14AEFC6D4A46795AD`.
 - [x] Create a stable repository release for the submission version: `energy-economics-submission-v2`.
 - [x] Archive the submission release on Zenodo. Version DOI: `10.5281/zenodo.22878011`; concept DOI: `10.5281/zenodo.22878010`.
-- [ ] Verify a clean-environment rerun of the replication instructions.
+- [x] Verify a clean-environment rerun of the replication instructions. GitHub Actions replication smoke test passed on commit `502f5c065f7b4fec0c37811bcbb423bcb96b2198`.
 
 ## Journal-facing files
 - [x] Manuscript in Elsevier elsarticle format.
@@ -45,8 +45,8 @@
 - [x] Final author name, KNUST affiliation and corresponding-author details confirmed.
 
 ## Final document QA
-- [x] Latest manuscript changes reflected in Overleaf.
-- [x] Final manuscript compiled successfully in Overleaf.
+- [x] Latest manuscript changes reflected in the GitHub manuscript source.
+- [x] Final manuscript compiled successfully in GitHub Actions on commit `502f5c065f7b4fec0c37811bcbb423bcb96b2198`.
 - [x] Bibliography resolves in the final compile.
 - [x] Final PDF visually checked for missing figures, table fit and appendix rendering.
 - [x] All nine figures checked for legibility.
